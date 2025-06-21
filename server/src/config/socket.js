@@ -1,7 +1,7 @@
 const { Server } = require("socket.io")
 let io;
-function initialize(app) {
-    io = new Server(require("http").createServer(app), {
+function initialize(server) {
+    io = new Server(server, {
         cors: {
             origin: "*",
             methods: ["GET", "POST"]
