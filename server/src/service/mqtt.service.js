@@ -1,53 +1,5 @@
-const mqtt = require('mqtt');
-const { parse } = require('date-fns');
-const { add_employee,delete_employee } = require('./employee.service');
-let io;
-let client;
-const config = {
-    mqtt: {
-        url: process.env.MQTT_BROKER_URL || 'mqtt://localhost:1883',
-        topic: process.env.MQTT_TOPIC || '#',
-        keepalive: 3600 // 1 hour in seconds
-    },
-    server: {
-        port: process.env.MQTT_PORT || 8883
-    }
-}
-
-
-function connect() {
-    const options = {
-        keepalive: config.mqtt.keepalive,
-        ...(process.env.MQTT_USERNAME && process.env.MQTT_PASSWORD && {
-            username: process.env.MQTT_USERNAME,
-            password: process.env.MQTT_PASSWORD
-        })
-    };
-
-    client = mqtt.connect(config.mqtt.url, options);
-
-    client.on('connect', () => {
-        console.log('Connected to MQTT broker');
-        subscribe();
-    });
-
-    client.on('message', (topic, message) => {
-        handleMessage(topic, message)
-    });
-    client.on('error', (error) => handleError(error));
-}
-
-function subscribe() {
-    client.subscribe(config.mqtt.topic, (err) => {
-        if (err) {
-            console.error('MQTT subscription error:', err);
-        } else {
-            console.log('Subscribed to MQTT topic:', config.mqtt.topic);
-        }
-    });
-}
-
-async function handleMessage(topic, message) {
+const {editEmployee,deleteEmployeeById,addEmployee} = require("../repository/employee.repository")
+ async function handleMessage(topic, message) {
     try {
         const messageString = message.toString();
         let eventData = JSON.parse(messageString);
@@ -82,24 +34,23 @@ async function handleMessage(topic, message) {
                 registrationDate: new Date(eventData.timestamp?eventData.timestamp:Date.now),
             };
             // Kiểm tra nếu đã tồn tại thì cập nhật, chưa có thì thêm mới
-            await add_employee(registrationData);
-            console.log("mqtt.service.handleMessage.add_employee.success")
+            await addEmployee(registrationData);
+            console.log("mqtt.service.handleMessage.addEmployee.success")
             return;
         }
 
         if (cmd === 'delete_employee') {
             // Xóa nhân viên
-            await delete_employee(eventData.employeeId);
+            await deleteEmployeeById(eventData.employeeId);
 
-            console.log("mqtt.service.handleMessage.delete_employee.success")
+            console.log("mqtt.service.handleMessage.deleteEmployee.success")
             return;
         }
         if (cmd == 'edit_employee') {
             let editData = {
-                employeeId: eventData.employeeId,
-                employeeName: eventData.employeeName,
+                _id: eventData.employeeId,
+                fullName: eventData.employeeName,
                 deviceId: eventData.deviceId,
-                timestamp: eventData.timestamp,
             };
             if (eventData.faceBase64) {
                 editData.faceBase64 = "data:image/jpeg;base64, " + eventData.faceBase64;
@@ -107,23 +58,17 @@ async function handleMessage(topic, message) {
             if (eventData.faceEmbedding) {
                 editData.faceEmbedding = eventData.faceEmbedding;
             }
-            console.log("edit_employee :" + editData); 
+            editEmployee(editData);
+            console.log("mqtt.service.handleMessage.editEmployee.success")
+            return;
         }
         console.error('Unknown cmd:', cmd);
-    } catch (error) {
-        console.error('MQTT Service - Error processing message (parsing or initial processing):', error);
+    } catch (e) {
+        console.error('mqtt.service.handleMessage.error', e.message);
+        
+    } finally {
+        return;
     }
 }
 
-function handleError(error) {
-    console.error('MQTT Client Error:', error);
-}
-
-function disconnect() {
-    if (client) {
-        client.end();
-    }
-}
-
-
-module.exports = {connect}
+module.exports = {handleMessage}

@@ -3,10 +3,12 @@ const mongoose = require('mongoose');
 const checkinSchema = new mongoose.Schema({
   deviceId: {
     type: String,
+    ref: "Devices",
     required: true
   },
   employeeId: {
     type: String,
+    ref: "Employees",
     required: false
   },
   timestamp: {
@@ -14,18 +16,14 @@ const checkinSchema = new mongoose.Schema({
     required: true,
     default: Date.now
   },
-  faceId: {
+  faceBase64: {
     type: String,
     required: false
   },
-  checkinStatus: {
-    type: String,
-    required: false
-  }
 }, {
   timestamps: true
 });
 
-const Checkin = mongoose.model('Checkin', checkinSchema);
+const Checkin = mongoose.model('Checkins', checkinSchema);
 
 module.exports = Checkin; 
