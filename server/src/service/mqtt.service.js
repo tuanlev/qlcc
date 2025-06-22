@@ -1,6 +1,6 @@
 const mqtt = require('mqtt');
 const { parse } = require('date-fns');
-const { add_employee } = require('./employee.service');
+const { add_employee,delete_employee } = require('./employee.service');
 let io;
 let client;
 const config = {
@@ -82,17 +82,17 @@ async function handleMessage(topic, message) {
                 registrationDate: new Date(eventData.timestamp?eventData.timestamp:Date.now),
             };
             // Kiểm tra nếu đã tồn tại thì cập nhật, chưa có thì thêm mới
-            add_employee(registrationData);
-            console.log("mqtt.service.handleMessage.log.success")
+            await add_employee(registrationData);
+            console.log("mqtt.service.handleMessage.add_employee.success")
             return;
         }
 
         if (cmd === 'delete_employee') {
             // Xóa nhân viên
-            console.log("delete_employee :" + eventData.employeeId )
+            await delete_employee(eventData.employeeId);
 
-           
-
+            console.log("mqtt.service.handleMessage.delete_employee.success")
+            return;
         }
         if (cmd == 'edit_employee') {
             let editData = {

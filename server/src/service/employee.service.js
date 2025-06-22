@@ -9,5 +9,12 @@ const add_employee = async (employeeData) => {
         console.log(e.message)
     }      
 }
-
-module.exports = {add_employee}
+const delete_employee = async (employeeId) => {
+    try {
+        let employee = await Employee.findByIdAndDelete(employeeId);
+        return employee;
+    } catch(e) {
+        console.log(e.message);
+    }
+}
+module.exports = {add_employee,delete_employee}
