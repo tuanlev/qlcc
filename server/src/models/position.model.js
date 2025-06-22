@@ -6,7 +6,7 @@ const positionSchema = new mongoose.Schema({
     required: true,
     unique: true
   },
-  departmentId: {
+  department: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Department',
     required: true

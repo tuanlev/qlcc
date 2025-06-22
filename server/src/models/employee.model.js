@@ -22,17 +22,17 @@ const employeeSchema = new mongoose.Schema({
   },
   department: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Department',
+    ref: 'Departments',
     required: false
   },
   position: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Position',
+    ref: 'Positions',
     required: false
   },
   shift: {
     type: mongoose.Schema.Types.ObjectId,
-    ref:'Shift'
+    ref:'Shifts'
   },
   registrationDate: {
     type: Date,
@@ -42,13 +42,13 @@ const employeeSchema = new mongoose.Schema({
     type: String,  // Base64 string or file path
     default: ''
   },
-  deviceId: {
+  device: {
     type: String,
     ref:"Devices"
   },
   userId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    ref: 'Users',
     required: false // Employee might not always be linked to a specific user for creation
   },
   faceEmbedding: {

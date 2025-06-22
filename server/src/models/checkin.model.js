@@ -1,12 +1,12 @@
 const mongoose = require('mongoose');
 
 const checkinSchema = new mongoose.Schema({
-  deviceId: {
+  device: {
     type: String,
     ref: "Devices",
     required: true
   },
-  employeeId: {
+  employee: {
     type: String,
     ref: "Employees",
     required: false

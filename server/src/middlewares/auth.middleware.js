@@ -10,10 +10,9 @@ const authorizeAdmin = async (req, res, next) => {
             if (user.role == "admin") {
                 req.grantedAuthority = devices
             }
+            next()
         }
     } catch (e) {
         next(new Error("auth.middleware.error :"+e.message));
     }
-
-
 }

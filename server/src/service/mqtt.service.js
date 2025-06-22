@@ -1,6 +1,9 @@
+const { getIo } = require("../config/socket");
 const { addCheckin } = require("../repository/checkin.repository");
-const {editEmployee,deleteEmployeeById,addEmployee} = require("../repository/employee.repository")
- async function handleMessage(topic, message) {
+
+const { editEmployee, deleteEmployeeById, addEmployee } = require("../repository/employee.repository");
+const { addShiftRecord } = require("./shiftrecord.service");
+async function handleMessage(topic, message) {
     try {
         const messageString = message.toString();
         let eventData = JSON.parse(messageString);
@@ -12,15 +15,17 @@ const {editEmployee,deleteEmployeeById,addEmployee} = require("../repository/emp
         }
         if (cmd === 'log') {
             const processedData = {
-             
-                    deviceId: eventData.deviceId,
-                    employeeId: eventData.employeeId,
-                    timestamp: new Date(eventData.timestamp),
-                    faceBase64: "data:image/jpeg;base64," + eventData.faceBase64,
-              
+
+                device: eventData.deviceId,
+                employee: eventData.employeeId,
+                timestamp: new Date(eventData.timestamp),
+                faceBase64: "data:image/jpeg;base64," + eventData.faceBase64,
+
             };
-            await addCheckin(processedData);
+            const result = await addCheckin(processedData);
             console.log("mqtt.service.handleMessage.log.success")
+
+            await addShiftRecord(result);
             return;
         }
 
@@ -29,10 +34,10 @@ const {editEmployee,deleteEmployeeById,addEmployee} = require("../repository/emp
             const registrationData = {
                 _id: eventData.employeeId,
                 fullName: eventData.employeeName,
-                deviceId: eventData.deviceId,
+                device: eventData.deviceId,
                 faceEmbedding: eventData.faceEmbedding,
                 faceBase64: "data:image/jpeg;base64," + eventData.faceBase64,
-                registrationDate: new Date(eventData.timestamp?eventData.timestamp:Date.now),
+                registrationDate: new Date(eventData.timestamp ? eventData.timestamp : Date.now),
             };
             // Kiểm tra nếu đã tồn tại thì cập nhật, chưa có thì thêm mới
             await addEmployee(registrationData);
@@ -51,7 +56,7 @@ const {editEmployee,deleteEmployeeById,addEmployee} = require("../repository/emp
             let editData = {
                 _id: eventData.employeeId,
                 fullName: eventData.employeeName,
-                deviceId: eventData.deviceId,
+                device: eventData.deviceId,
             };
             if (eventData.faceBase64) {
                 editData.faceBase64 = "data:image/jpeg;base64, " + eventData.faceBase64;
@@ -66,10 +71,10 @@ const {editEmployee,deleteEmployeeById,addEmployee} = require("../repository/emp
         console.error('Unknown cmd:', cmd);
     } catch (e) {
         console.error('mqtt.service.handleMessage.error', e.message);
-        
+
     } finally {
         return;
     }
 }
 
-module.exports = {handleMessage}
+module.exports = { handleMessage }

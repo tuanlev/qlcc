@@ -6,11 +6,9 @@ const departmentSchema = new mongoose.Schema({
     required: true,
     unique: true
   }
-  
-}, {
-  timestamps: true
+
 });
 
-const Department = mongoose.model('Department', departmentSchema);
+const Department = mongoose.model('Departments', departmentSchema);
 E
 module.exports = Department; 
