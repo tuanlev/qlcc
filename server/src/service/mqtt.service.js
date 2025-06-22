@@ -1,3 +1,4 @@
+const { addCheckin } = require("../repository/checkin.repository");
 const {editEmployee,deleteEmployeeById,addEmployee} = require("../repository/employee.repository")
  async function handleMessage(topic, message) {
     try {
@@ -11,15 +12,15 @@ const {editEmployee,deleteEmployeeById,addEmployee} = require("../repository/emp
         }
         if (cmd === 'log') {
             const processedData = {
-                data: {
+             
                     deviceId: eventData.deviceId,
                     employeeId: eventData.employeeId,
-                    employeeName: eventData.employeeName,
-                    timestamp: eventData.timestamp,
+                    timestamp: new Date(eventData.timestamp),
                     faceBase64: "data:image/jpeg;base64," + eventData.faceBase64,
-                }
+              
             };
-            console.log("log :" + processedData)
+            await addCheckin(processedData);
+            console.log("mqtt.service.handleMessage.log.success")
             return;
         }
 
