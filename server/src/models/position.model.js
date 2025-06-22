@@ -11,10 +11,8 @@ const positionSchema = new mongoose.Schema({
     ref: 'Department',
     required: true
   }
-}, {
-  timestamps: true
 });
 
-const Position = mongoose.model('Position', positionSchema);
+const Position = mongoose.model('Positions', positionSchema);
 
 module.exports = Position; 

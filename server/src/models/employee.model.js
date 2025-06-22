@@ -44,8 +44,7 @@ const employeeSchema = new mongoose.Schema({
   },
   deviceId: {
     type: String,
-    required: false,
-    trim: true
+    ref:"Devices"
   },
   userId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -61,6 +60,6 @@ const employeeSchema = new mongoose.Schema({
 });
 
 
-const Employee = mongoose.model('Employee', employeeSchema);
+const Employee = mongoose.model('Employees', employeeSchema);
 
 module.exports = Employee; 

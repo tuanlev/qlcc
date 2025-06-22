@@ -13,8 +13,8 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['user', 'admin', 'superadmin'],
-    default: 'user'
+    enum: ['admin', 'superadmin'],
+    default: 'admin'
   },
   imageAvatar: {
     type: String,
@@ -29,7 +29,8 @@ const userSchema = new mongoose.Schema({
     default: Date.now
   },
   devices: [{
-    type: String
+    type: String,
+    ref:"Devices"
   }]
 }, {
   timestamps: true // Adds createdAt and updatedAt timestamps
