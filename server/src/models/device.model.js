@@ -7,6 +7,5 @@ const deviceSchema = new mongoose.Schema({
 }
 );
 
-const Device = mongoose.model('Devices', departmentSchema);
-E
+const Device = mongoose.model('Devices', deviceSchema);
 module.exports = Device; 

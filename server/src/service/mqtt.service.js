@@ -2,13 +2,14 @@ const { getIo } = require("../config/socket");
 const { addCheckin } = require("../repository/checkin.repository");
 
 const { editEmployee, deleteEmployeeById, addEmployee } = require("../repository/employee.repository");
+const { addDevice } = require("./device.service");
 const { addShiftRecord } = require("./shiftrecord.service");
 async function handleMessage(topic, message) {
     try {
         const messageString = message.toString();
         let eventData = JSON.parse(messageString);
         const { cmd } = eventData;
-
+        addDevice(cmd.deviceId);
         if (!cmd) {
             console.error('Missing cmd in message:', eventData);
             return;

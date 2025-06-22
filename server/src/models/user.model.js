@@ -28,10 +28,10 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   },
-  devices: [{
+  devices: {
     type: String,
     ref:"Devices"
-  }]
+  }
 }, {
   timestamps: true // Adds createdAt and updatedAt timestamps
 });

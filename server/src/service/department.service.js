@@ -7,9 +7,18 @@ exports.getDepartments = async () => {
         throw new Error("department.service.getDeparments.error: "+ e.message);
     }
 } 
+exports.addDepartment = async (department) => {
+    try {
+        return await (new Department(department)).save();
+    } catch (e) {
+        throw new Error("department.service.updateDepartmentById.error: "+ e.message);
+
+    }
+}
+
 exports.updateDepartment = async (department) => {
     try {
-        return await Department.findByIdAndUpdate(department.id,department);
+        return await Department.findByIdAndUpdate(department.id,department,{new:true});
     } catch (e) {
         throw new Error("department.service.updateDepartmentById.error: "+ e.message);
 
