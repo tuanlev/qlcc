@@ -1,5 +1,6 @@
 const mqtt = require('mqtt');
 const { parse } = require('date-fns');
+const { add_employee } = require('./employee.service');
 let io;
 let client;
 const config = {
@@ -73,16 +74,16 @@ async function handleMessage(topic, message) {
         if (cmd === 'add_employee') {
             // Thêm hoặc cập nhật nhân viên
             const registrationData = {
-                employeeId: eventData.employeeId,
-                employeeName: eventData.employeeName,
+                _id: eventData.employeeId,
+                fullName: eventData.employeeName,
                 deviceId: eventData.deviceId,
                 faceEmbedding: eventData.faceEmbedding,
                 faceBase64: "data:image/jpeg;base64," + eventData.faceBase64,
-                timestamp: eventData.timestamp,
+                registrationDate: new Date(eventData.timestamp?eventData.timestamp:Date.now),
             };
             // Kiểm tra nếu đã tồn tại thì cập nhật, chưa có thì thêm mới
-            console.log("add_employee :" + registrationData)
-
+            add_employee(registrationData);
+            console.log("mqtt.service.handleMessage.log.success")
             return;
         }
 
@@ -101,7 +102,7 @@ async function handleMessage(topic, message) {
                 timestamp: eventData.timestamp,
             };
             if (eventData.faceBase64) {
-                editData.faceBase64 = "data:image/jpeg;base64," + eventData.faceBase64;
+                editData.faceBase64 = "data:image/jpeg;base64, " + eventData.faceBase64;
             }
             if (eventData.faceEmbedding) {
                 editData.faceEmbedding = eventData.faceEmbedding;

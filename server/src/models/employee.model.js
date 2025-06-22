@@ -1,10 +1,8 @@
 const mongoose = require('mongoose');
 
 const employeeSchema = new mongoose.Schema({
-  employeeId: {
+  _id: {
     type: String,
-    required: true,
-    unique: true
   },
   fullName: {
     type: String,
@@ -33,29 +31,16 @@ const employeeSchema = new mongoose.Schema({
     required: false
   },
   shift: {
-    type: String,
-    default: ''
+    type: mongoose.Schema.Types.ObjectId,
+    ref:'Shift'
   },
   registrationDate: {
     type: Date,
     default: Date.now
   },
-  faceImage: {
+  faceBase64: {
     type: String,  // Base64 string or file path
     default: ''
-  },
-  imageAvatar: {
-    type: String,  // Base64 string or file path
-    default: ''
-  },
-  image34: {
-    type: String,  // Base64 string or file path
-    default: ''
-  },
-  status: {
-    type: String,
-    enum: ['active', 'inactive'],
-    default: 'active'
   },
   deviceId: {
     type: String,
