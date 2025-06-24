@@ -5,7 +5,7 @@ exports.getShiftById = async (shiftId) => {
     try {
         return shiftDTO(await Shift.findById({ _id: shiftId }));
     } catch (e) {
-        console.log("shift.service.error: " + e.message);
+        throw new Error(("shift.service.error: " + e.message));
     }
 }
 exports.getShifts = async () => {
@@ -13,7 +13,7 @@ exports.getShifts = async () => {
         let result = await Shift.find();
         return result.map(r => shiftDTO(r));
     } catch (e) {
-        console.log("shift.service.error: " + e.message);
+        throw new Error(("shift.service.error: " + e.message));
     }
 }
 exports.addShift = async (shift) => {
@@ -22,14 +22,14 @@ exports.addShift = async (shift) => {
         const result = new Shift(shift);
         return shiftDTO(await result.save())
     } catch (e) {
-        console.log("shift.service.error: " + e.message);
+        throw new Error(("shift.service.error: " + e.message));
     }
 }
 exports.deleteShiftById = async (shiftId) => {
     try {
         return shiftDTO(await Shift.findByIdAndDelete({ _id: shiftId }));
     } catch (e) {
-        console.log("shift.service.error: " + e.message);
+        throw new Error(("shift.service.error: " + e.message));
     }
 }
 exports.updateShift = async (shiftId,shift) => {
@@ -37,6 +37,6 @@ exports.updateShift = async (shiftId,shift) => {
         shift = shiftDTOtoShift(shift)
         return shiftDTO(await Shift.findByIdAndUpdate({ _id:shiftId }, shift, { new: true }));
     } catch (e) {
-        console.log("shift.service.error: " + e.message);
+        throw new Error(("shift.service.error: " + e.message));
     }
 }

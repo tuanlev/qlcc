@@ -1,7 +1,7 @@
 exports.shiftDTO  =  ({_id,name,checkInHour,checkOutHour}) => {
     return {
         shiftId:_id,
-        nameShift,
+        nameShift:name,
         checkInHour,
         checkOutHour
     }
