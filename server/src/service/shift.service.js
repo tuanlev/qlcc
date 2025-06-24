@@ -8,9 +8,16 @@ exports.getShiftById = async (shiftId) => {
         throw new Error(("shift.service.error: " + e.message));
     }
 }
-exports.getShifts = async () => {
+exports.getShifts = async (keyword = null) => {
     try {
-        let result = await Shift.find();
+        let query = {};
+        if (keyword) {
+            query.$or = [
+                { name: { $regex: keyword, $options: 'i' } },
+                { _id: { $regex: keyword, $options: 'i' } }
+            ];
+        }
+        let result = await Shift.find(query);
         return result.map(r => shiftDTO(r));
     } catch (e) {
         throw new Error(("shift.service.error: " + e.message));

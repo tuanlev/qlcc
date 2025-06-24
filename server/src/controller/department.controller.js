@@ -2,6 +2,7 @@ const departmentService = require("../service/department.service")
 
 exports.getDepartments = async (req, res, next) => {
     try {
+        const {keyword} = req.query;
         const result = await departmentService.getDepartments();
         res.status(200).json({
             data: result,

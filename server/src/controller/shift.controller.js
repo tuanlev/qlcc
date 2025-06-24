@@ -2,7 +2,8 @@ const { getShifts, getShiftById, updateShift, addShift, deleteShiftById } = requ
 
 exports.getShifts = async (req, res, next) => {
     try {
-        const result = await getShifts();
+        const { keyword } = req.query;
+        const result = await getShifts(keyword);
         res.status(200).json({
             data: result,
             message: "success"
@@ -53,7 +54,7 @@ exports.deleteShift = async (req, res, next) => {
 exports.updateShiftById = async (req, res, next) => {
     try {
         const { shiftId } = req.params;
-        const result = await updateShift(shiftId,req.body);
+        const result = await updateShift(shiftId, req.body);
         res.status(200).json({
             data: result,
             message: "success"

@@ -1,9 +1,16 @@
 const { departmentDTO, departmentDTOtoDepartment } = require("../dtos/department.dto");
 const Department = require("../models/department.model");
 
-exports.getDepartments = async () => {
+exports.getDepartments = async (keyword = null) => {
     try {
-        const result = await Department.find();
+        let query = {};
+        if (keyword) {
+            query.$or = [
+                { name: { $regex: keyword, $options: 'i' } },
+                { _id: { $regex: keyword, $options: 'i' } }
+            ];
+        }
+        const result = await Department.find(query);
         return result.map(r => departmentDTO(r))
     } catch (e) {
         throw new Error("department.service.getDepartments.error: " + e.message);
