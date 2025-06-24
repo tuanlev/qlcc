@@ -1,7 +1,7 @@
 const Checkin = require("../models/checkin.model");
 const Department = require("../models/department.model");
 const Employee = require("../models/employee.model");
-const Shift = require("../models/Shift.model");
+const Shift = require("../models/shift.model");
 const ShiftRecord = require("../models/shiftrecord.model");
 const { dateCompare, shiftHoursToDates } = require("../utils/dateHandle");
 const { getDepartments } = require("./department.service");
@@ -85,7 +85,120 @@ exports.addShiftRecord = async (newCheckin) => {
  * @param {String} [filters.keyword] - tìm theo employeeId hoặc fullName
  * @param {String} [filters.deviceId]
  */
-exports.getShiftRecordsWithFilters = async ({ date, departmentId, keyword, deviceId }) =>{
+exports.getShiftRecordsWithFiltersByDay = async ({ date, departmentId, keyword, deviceId }) =>{
+  const matchConditions = [];
+
+  // Tạo range ngày nếu có
+   if (date) {
+    let start, end;
+
+    if (/^\d{4}$/.test(date)) {
+      // Dạng yyyy
+      start = new Date(`${date}-01-01T00:00:00.000Z`);
+      end = new Date(`${date}-12-31T23:59:59.999Z`);
+    } else if (/^\d{4}-\d{2}$/.test(date)) {
+      // Dạng yyyy-mm
+      const [year, month] = date.split('-');
+      start = new Date(`${year}-${month}-01T00:00:00.000Z`);
+
+      // Tìm ngày cuối cùng của tháng
+      const lastDay = new Date(year, parseInt(month), 0).getDate(); // tháng bắt đầu từ 0 nên không -1
+      end = new Date(`${year}-${month}-${lastDay}T23:59:59.999Z`);
+    } else if (/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      // Dạng yyyy-mm-dd
+      start = new Date(`${date}T00:00:00.000Z`);
+      end = new Date(`${date}T23:59:59.999Z`);
+    } else {
+      throw new Error("Invalid date format");
+    }
+
+    matchConditions.push({ createdAt: { $gte: start, $lte: end } });
+  }
+
+  const pipeline = [
+    ...(matchConditions.length ? [{ $match: { $and: matchConditions } }] : []),
+
+    // Join employee
+    {
+      $lookup: {
+        from: 'employees',
+        localField: 'employee',
+        foreignField: '_id',
+        as: 'employee'
+      }
+    },
+    { $unwind: '$employee' },
+
+    // Join department
+    {
+      $lookup: {
+        from: 'departments',
+        localField: 'employee.department',
+        foreignField: '_id',
+        as: 'employee.department'
+      }
+    },
+    { $unwind: { path: '$employee.department', preserveNullAndEmptyArrays: true } },
+
+    // Join checkIn
+    {
+      $lookup: {
+        from: 'checkins',
+        localField: 'checkIn',
+        foreignField: '_id',
+        as: 'checkIn'
+      }
+    },
+    { $unwind: { path: '$checkIn', preserveNullAndEmptyArrays: true } },
+
+    // Join checkOut
+    {
+      $lookup: {
+        from: 'checkins',
+        localField: 'checkOut',
+        foreignField: '_id',
+        as: 'checkOut'
+      }
+    },
+    { $unwind: { path: '$checkOut', preserveNullAndEmptyArrays: true } },
+
+    // Match theo employee.device, department, keyword
+    {
+      $match: {
+        ...(departmentId && {
+          'employee.department._id': new mongoose.Types.ObjectId(departmentId)
+        }),
+        ...(deviceId && {
+          'employee.device': deviceId
+        }),
+        ...(keyword && {
+          $or: [
+            { 'employee._id': { $regex: keyword, $options: 'i' } },
+            { 'employee.fullName': { $regex: keyword, $options: 'i' } }
+          ]
+        })
+      }
+    },
+
+    // Project kết quả
+    {
+      $project: {
+        employeeId: '$employee._id',
+        employeeName: '$employee.fullName',
+        departmentName: '$employee.department.name',
+        deviceId: '$employee.device',
+        checkInTime: '$checkIn.timestamp',
+        checkOutTime: '$checkOut.timestamp',
+        checkInStatus: 1,
+        checkOutStatus: 1,
+        createdAt: 1
+      }
+    }
+  ];
+
+  return await ShiftRecord.aggregate(pipeline);
+}
+exports.getShiftRecordsWithFiltersByMonth = async ({ date, departmentId, keyword, deviceId }) =>{
   const matchConditions = [];
 
   // Tạo range ngày nếu có
