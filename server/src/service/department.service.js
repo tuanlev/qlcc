@@ -6,8 +6,7 @@ exports.getDepartments = async (keyword = null) => {
         let query = {};
         if (keyword) {
             query.$or = [
-                { name: { $regex: keyword, $options: 'i' } },
-                { _id: { $regex: keyword, $options: 'i' } }
+                { name: { $regex: keyword, $options: 'i' } }
             ];
         }
         const result = await Department.find(query);

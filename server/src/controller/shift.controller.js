@@ -38,7 +38,7 @@ exports.getShiftsById = async (req, res, next) => {
         next(new Error("shift.controller.getShiftsById.error: " + e.message));
     }
 }
-exports.deleteShift = async (req, res, next) => {
+exports.deleteShiftById = async (req, res, next) => {
     try {
         const { shiftId } = req.params;
         const result = await deleteShiftById(shiftId);

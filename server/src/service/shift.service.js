@@ -13,9 +13,7 @@ exports.getShifts = async (keyword = null) => {
         let query = {};
         if (keyword) {
             query.$or = [
-                { name: { $regex: keyword, $options: 'i' } },
-                { _id: { $regex: keyword, $options: 'i' } }
-            ];
+                { name: { $regex: keyword, $options: 'i' } }];
         }
         let result = await Shift.find(query);
         return result.map(r => shiftDTO(r));
@@ -39,10 +37,10 @@ exports.deleteShiftById = async (shiftId) => {
         throw new Error(("shift.service.error: " + e.message));
     }
 }
-exports.updateShift = async (shiftId,shift) => {
+exports.updateShift = async (shiftId, shift) => {
     try {
         shift = shiftDTOtoShift(shift)
-        return shiftDTO(await Shift.findByIdAndUpdate({ _id:shiftId }, shift, { new: true }));
+        return shiftDTO(await Shift.findByIdAndUpdate({ _id: shiftId }, shift, { new: true }));
     } catch (e) {
         throw new Error(("shift.service.error: " + e.message));
     }

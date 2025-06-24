@@ -6,7 +6,7 @@ exports.shiftDTO  =  ({_id,name,checkInHour,checkOutHour}) => {
         checkOutHour
     }
 }
-exports.shiftDTOtoShift = ({shiftId,nameShift,checkInHour,checkOutHour}) =>{
+exports.shiftDTOtoShift = ({shiftId,nameShift,checkInHour,checkOutHour}) => {
     return {
         _id:shiftId,
         name:nameShift,
