@@ -4,6 +4,7 @@ const cors = require("cors");
 const { errorHandling } = require("./middlewares/errorHandling.middleware");
 const { getEmployees } = require("./controller/employee.controller");
 const shiftRoute = require("./routes/shift.route");
+const routes = require("./routes");
 const app = express();
 const server = require("http").createServer(app);
 // khởi tạo socket
@@ -12,9 +13,7 @@ require("./config/db")();
 require("./config/mqtt").connect(server);
 app.use(express.json())
 app.use(cors())
-app.get("/",getEmployees)
-app.get('/api/employees',getEmployees);
-app.use(shiftRoute)
+app.use(routes)
 app.use(errorHandling)
 server.listen(process.env.PORT || 3000, () => {
     console.log("server run on port: " + process.env.PORT || 3000)
