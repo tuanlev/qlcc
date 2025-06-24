@@ -46,7 +46,6 @@ exports.getPositionById =async (positionId) => {
 exports.updatePositionById = async (positionId,position) => {
     try {
        position = positionDTOQueryToPosition(position);
-       console.log(position)
        return positionDTO(await Position.findByIdAndUpdate(positionId,position,{new:true}).populate("department"));
 
     } catch (e) { 
