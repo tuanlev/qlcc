@@ -1,38 +1,42 @@
+const { shiftDTO, shiftDTOtoShift } = require("../dtos/shift.dto");
 const Shift = require("../models/shift.model");
 
 exports.getShiftById = async (shiftId) => {
     try {
-        return await Shift.findById({_id:shiftId});
+        return shiftDTO(await Shift.findById({ _id: shiftId }));
     } catch (e) {
-        console.log("shift.service.error: "+ e.message);
+        console.log("shift.service.error: " + e.message);
     }
 }
 exports.getShifts = async () => {
     try {
-        return await Shift.findById();
+        let result = await Shift.find();
+        return result.map(r => shiftDTO(r));
     } catch (e) {
-        console.log("shift.service.error: "+ e.message);
+        console.log("shift.service.error: " + e.message);
     }
 }
 exports.addShift = async (shift) => {
     try {
+        shift = shiftDTOtoShift(shift)
         const result = new Shift(shift);
-        return await result.save()
+        return shiftDTO(await result.save())
     } catch (e) {
-        console.log("shift.service.error: "+ e.message);
+        console.log("shift.service.error: " + e.message);
     }
 }
 exports.deleteShiftById = async (shiftId) => {
     try {
-        return await Shift.findByIdAndDelete({_id:shiftId});
+        return shiftDTO(await Shift.findByIdAndDelete({ _id: shiftId }));
     } catch (e) {
-        console.log("shift.service.error: "+ e.message);
+        console.log("shift.service.error: " + e.message);
     }
 }
-exports.updateShift = async (shift) => {
+exports.updateShift = async (shiftId,shift) => {
     try {
-        return await Shift.findByIdAndUpdate({_id:shift._id},shift,{new:true});
+        shift = shiftDTOtoShift(shift)
+        return shiftDTO(await Shift.findByIdAndUpdate({ _id:shiftId }, shift, { new: true }));
     } catch (e) {
-        console.log("shift.service.error: "+ e.message);
-    } 
+        console.log("shift.service.error: " + e.message);
+    }
 }

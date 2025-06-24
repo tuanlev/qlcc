@@ -4,11 +4,12 @@ exports.getShifts = async (req, res, next) => {
     try {
         const result = await getShifts();
         res.status(200).json({
-            data: result
+            data: result,
+            message:"success"
         })
     }
     catch (e) {
-        console.log("shift.controller.error: " + e.message);
+        console.log("shift.controller.getShifts.error: " + e.message);
         next(e)
     }
 }
@@ -18,24 +19,26 @@ exports.getShiftsById = async (req, res, next) => {
         const {shiftId} = req.params;
         const result = await getShiftById(shiftId);
         res.status(200).json({
-            data: result
+            data: result,
+            message:"success"
         })
     }
     catch (e) {
-        console.log("shift.controller.error: " + e.message);
+        console.log("shift.controller.getShiftsById.error: " + e.message);
         next(e)
     }
 }
 exports.updateShiftById = async (req, res, next) => {
     try {
-        const {shiftId} = req.params;
-        const result = await this.updateShift(shiftId);
-        res.status(200).json({
-            data: result
+        const {shiftId} = req.query;
+        const result = await updateShift(shiftId);
+         res.status(200).json({
+            data: result,
+            message:"success"
         })
     }
     catch (e) {
-        console.log("shift.controller.error: " + e.message);
+        console.log("shift.controller.getShiftsById.error: " + e.message);
         next(e)
     }
 }
