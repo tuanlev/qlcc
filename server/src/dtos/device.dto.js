@@ -8,6 +8,6 @@ exports.deviceDTO = ({ _id, name }) => {
 exports.deviceDTOtoDevice = ({deviceId,nameDevice}) => {
     const result = {}
     if (deviceId) result._id = deviceId;
-    if (nameDevice) result.name = null;
-    
+    if (nameDevice!==undefined) result.name = (nameDevice =="")?null:nameDevice ;
+    return result;
 }

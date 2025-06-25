@@ -4,9 +4,8 @@ const Device = require("../models/device.model")
 
 exports.addDevice = async (device) => {
     try {
-
-        
-        return await  (new Device(deviceDTOtoDevice(device))).save();
+        console.log("device.service.addDevice: ", device);
+        return await (new Device(deviceDTOtoDevice(device))).save();
     } catch (e) {
         throw new Error("device.service.adddevice.error:" + e.message)
     }

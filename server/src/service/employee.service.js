@@ -1,6 +1,7 @@
+const { addYears } = require('date-fns/addYears');
 const Employee = require('../models/employee.model'); // hoặc đúng đường dẫn bạn có
 
-const getEmployees = async ({ departmentId, keyword, deviceId }) => {
+exports.getEmployees = async ({ departmentId, keyword, deviceId }) => {
     const filter = {};
     console.log(deviceId);
     if (keyword) {
@@ -30,5 +31,19 @@ const getEmployees = async ({ departmentId, keyword, deviceId }) => {
         throw new Error('employee.service.error: ' + error.message);
     }
 };
-
-module.exports = { getEmployees };
+exports.getEmployeeById = async (employeeId) => {
+    try {
+        const employee = await Employee.findById(employeeId)
+            .populate('department')
+            .populate('position')
+            .populate('shift')
+            .populate('userId')
+            .populate('device');
+        if (!employee) {
+            throw new Error('Employee not found');
+        }
+        return employee;
+    } catch (error) {
+        throw new Error('employee.service.getEmployeeById.error: ' + error.message);
+    }
+};

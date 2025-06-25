@@ -9,7 +9,11 @@ async function handleMessage(topic, message) {
         const messageString = message.toString();
         let eventData = JSON.parse(messageString);
         const { cmd } = eventData;
-        addDevice(cmd.deviceId);
+        try {
+        await addDevice({deviceId:eventData.deviceId});
+        } catch (e) {
+            console.error('mqtt.service.handleMessage.addDevice.error', e.message);
+        }
         if (!cmd) {
             console.error('Missing cmd in message:', eventData);
             return;
@@ -24,9 +28,9 @@ async function handleMessage(topic, message) {
 
             };
             const result = await addCheckin(processedData);
-            console.log("mqtt.service.handleMessage.log.success")
+            console.log("mqtt.service.handleMessage.log.success" + result);
 
-            await addShiftRecord(result);
+            // await addShiftRecord(result);
             return;
         }
 

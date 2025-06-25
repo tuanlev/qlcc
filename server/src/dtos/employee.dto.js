@@ -1,0 +1,36 @@
+const { departmentDTO } = require("./department.dto");
+const { positionDTO } = require("./position.dto");
+const { shiftDTO } = require("./shift.dto");
+const { userDTO } = require("./user.dto");
+const { deviceDTO } = require("./device.dto");
+
+exports.employeeDTO = ({
+  _id,
+  fullName,
+  email,
+  phone,
+  department,
+  position,
+  shift,
+  registrationDate,
+  faceBase64,
+  device,
+  userId,
+  faceEmbedding
+
+}) => {
+  const result = {};
+  if (_id) result.employeeId = _id;
+  if (fullName) result.fullName = fullName;
+  if (email) result.email = email;
+  if (phone) result.phone = phone;
+  if (department) result.department = departmentDTO(department);
+  if (position) result.position = positionDTO(position);
+  if (shift) result.shift = shiftDTO(shift);
+  if (registrationDate) result.registrationDate = registrationDate;
+  if (faceBase64) result.faceBase64 = faceBase64;
+  if (device) result.device = deviceDTO(device);
+  if (userId) result.user = userDTO(userId);
+  if (faceEmbedding) result.faceEmbedding = faceEmbedding;
+  return result;
+};

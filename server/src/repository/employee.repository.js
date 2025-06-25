@@ -26,9 +26,26 @@ const editEmployee = async (employeeData) => {
         throw new Error("employee.repository.editEmployee.error" + e.message);
     }
 }
+const getEmployeeById = async (employeeId) => {
+    try {
+        const employee = await Employee.findById(employeeId)
+            .populate('department')
+            .populate('position')
+            .populate('shift')
+            .populate('userId')
+            .populate('device');
+        if (!employee) {
+            throw new Error('Employee not found');
+        }
+        return employeeDTO(employee);
+    } catch (error) {
+        throw new Error('employee.service.getEmployeeById.error: ' + error.message);
+    }
+};
 
 module.exports = {
     addEmployee,
     deleteEmployeeById,
-    editEmployee
+    editEmployee,
+    getEmployeeById
 }

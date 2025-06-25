@@ -1,5 +1,6 @@
 const { userDTOQueryToUser, userDTO } = require("../dtos/user.dto");
-const User = require("../models/user.model")
+const User = require("../models/user.model");
+const { hashPassword, verifyPassword } = require("../utils/passwordHash");
 
 exports.LoadUserByUsername = async (username) => {
     try {
@@ -23,8 +24,8 @@ exports.deleteUserById = async (userId) => {
     }
 }
 exports.addUser = async (user) => {
-    try {
-        const newUser =  await User(userDTOQueryToUser(user) );
+    try { 
+        const newUser =  new User(userDTOQueryToUser(user));
         return userDTO(await newUser.save());
     } catch (e) {
         throw new Error("user.service.addUser.error: "+e.message);
@@ -32,15 +33,25 @@ exports.addUser = async (user) => {
 }
 exports.getUsers = async ()=> {
     try {
-        return (await newUser.find({})).map(r=>userDTO(r));
+        return (await User.find({})).map(r=>userDTO(r));
     } catch (e) {
         throw new Error("user.service.addUser.error: "+e.message);
     }
 }
 exports.getUserById = async (userId)=> {
     try {
-        return userDTO(await newUser.findById(userId));
+        return userDTO(await User.findById(userId));
     } catch (e) {
         throw new Error("user.service.addUser.error: "+e.message);
+    }
+}
+exports.login = async ({username,password}) => {
+    try {
+        const user = await User.findOne({username});
+       if (!user) throw new Error("User not found");
+       if (!verifyPassword(password, user.password)) throw new Error("Invalid password");
+       return userDTO(user);
+    } catch (e) {
+        throw new Error("user.service.login.error: "+e.message);
     }
 }

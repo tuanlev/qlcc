@@ -6,4 +6,5 @@ const routes = require("express").Router();
 routes.use("/shifts",shiftRoute);
 routes.use("/departments",departmentRoute);
 routes.use("/positions",positionRoute)
+routes.use("/auth", require("./auth.route"));
 module.exports = routes;
