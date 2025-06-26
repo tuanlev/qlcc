@@ -46,11 +46,6 @@ const employeeSchema = new mongoose.Schema({
     type: String,
     ref:"Devices"
   },
-  userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Users',
-    required: false // Employee might not always be linked to a specific user for creation
-  },
   faceEmbedding: {
     type: String, // Base64 string hoặc vector embedding
     default: ''

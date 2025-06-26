@@ -1,4 +1,4 @@
-const { getShifts, addShift, deleteShift, updateShiftById, getShiftsById, deleteShiftById } = require("../controller/shift.controller");
+const { getShifts, addShift, updateShiftById, getShiftsById, deleteShiftById } = require("../controller/shift.controller");
 
 const shiftRoute = require("express").Router();
 shiftRoute.get("/",getShifts);

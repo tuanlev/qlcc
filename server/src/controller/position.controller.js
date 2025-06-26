@@ -1,5 +1,11 @@
 const positionService = require("../service/position.service");
 exports.getPositions = async (req, res, next) => {
+    if (req.authRole != "admin") {
+            res.status(404).json({
+                message: "Unauthorized: You do not have permission to access this resource"
+            });
+            return;
+        }
     try {
         const data = await positionService.getPositions(req.query);
         if (data == [] || !data) throw new Error("no data found");
@@ -13,6 +19,12 @@ exports.getPositions = async (req, res, next) => {
     }
 }
 exports.updatePositionById = async (req, res, next) => {
+    if (req.authRole != "admin") {
+            res.status(404).json({
+                message: "Unauthorized: You do not have permission to access this resource"
+            });
+            return;
+        }
     try {
         const {positionId} = req.params;
         const data =await  positionService.updatePositionById(positionId, req.body)
@@ -27,6 +39,12 @@ exports.updatePositionById = async (req, res, next) => {
     }
 }
 exports.getPositionById = async (req, res, next) => {
+    if (req.authRole != "admin") {
+            res.status(404).json({
+                message: "Unauthorized: You do not have permission to access this resource"
+            });
+            return;
+        }
     try {
         const {positionId} = req.params;
         const data =await  positionService.getPositionById(positionId);
@@ -41,6 +59,12 @@ exports.getPositionById = async (req, res, next) => {
     }
 }
 exports.deletePositionById = async (req, res, next) => {
+    if (req.authRole != "admin") {
+            res.status(404).json({
+                message: "Unauthorized: You do not have permission to access this resource"
+            });
+            return;
+        }
     try {
         const {positionId} = req.params;
         await positionService.deletePositionById(positionId)
@@ -52,6 +76,12 @@ exports.deletePositionById = async (req, res, next) => {
     }
 }
 exports.addPosition = async (req, res, next) => {
+    if (req.authRole != "admin") {
+            res.status(404).json({
+                message: "Unauthorized: You do not have permission to access this resource"
+            });
+            return;
+        }
     try {
         const data =await  positionService.addPosition(req.body);
         if (data == [] || !data) throw new Error("no data found");

@@ -1,7 +1,4 @@
 exports.dateCompare = (date1, date2) => {
-
-
-
   const diffMs = date1.getTime() - date2.getTime();
   const diffMs1 = date2.getTime() - date1.getTime();
 
@@ -9,9 +6,8 @@ exports.dateCompare = (date1, date2) => {
 
   if (diffMs1 >= oneHourMs) return false;
   if (date1 <= date2) return true;
-  if (diffMs >= oneHourMs) return false;
-
-  return true;
+  return diffMs <= oneHourMs; 
+  
 }
 exports.shiftHoursToDates = (shift, baseDate = new Date()) => {
   const year = baseDate.getFullYear();

@@ -17,8 +17,7 @@ exports.getEmployees = async ({ departmentId, keyword, deviceId }) => {
     }
     if (deviceId) {
         filter.device = deviceId;
-    }
-    else filter.device = "";
+    } else filter.device = "";
     try {
         const employees = await Employee.find(filter)
             .populate('department')
@@ -32,9 +31,9 @@ exports.getEmployees = async ({ departmentId, keyword, deviceId }) => {
         throw new Error('employee.service.error: ' + error.message);
     }
 };
-exports.getEmployeeById = async (employeeId) => {
+exports.getEmployeeById = async (employeeId, deviceId) => {
     try {
-        const employee = await Employee.findById(employeeId)
+        const employee = await Employee.findOne({ _id: employeeId, device: deviceId })
             .populate('department')
             .populate('position')
             .populate('shift')
