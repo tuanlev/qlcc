@@ -8,4 +8,5 @@ routes.use("/departments",departmentRoute);
 routes.use("/positions",positionRoute)
 routes.use("/auth", require("./auth.route"));
 routes.use("/users", require("./user.route"));
+routes.use("/devices", require("./device.route"));
 module.exports = routes;
