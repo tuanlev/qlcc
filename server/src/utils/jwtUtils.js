@@ -19,15 +19,17 @@ function decode(token) {
 }
 function encode(data) {
     try {
+        delete data.iat;
+        delete data.exp;
         const token = Jwt.sign(data, process.env.JWT_SECRET, {
             expiresIn: '30minutes' // Token will expire in 30 minutes
         })
         return "Bearer " + token;
     }
     catch (e) {
-        throw new Error("method: encode, error: "+ e.name);
+        throw new Error("method: encode, error: " + e.name);
     }
-} 
+}
 module.exports = {
     decode,
     encode

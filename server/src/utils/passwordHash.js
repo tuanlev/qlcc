@@ -5,8 +5,8 @@ const hashPassword = (password) => {
 };
 
 const verifyPassword = (password, hash) => {
-    const verifyHash = crypto.createHash('sha512').update(password).digest('hex');
-    return verifyHash === hash;
+    const verifyHash = hashPassword(password);
+    return verifyHash.toString() == hash.toString();
 };
 
 module.exports = {

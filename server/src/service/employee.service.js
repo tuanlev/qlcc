@@ -18,6 +18,7 @@ exports.getEmployees = async ({ departmentId, keyword, deviceId }) => {
     if (deviceId) {
         filter.device = deviceId;
     }
+    else filter.device = "";
     try {
         const employees = await Employee.find(filter)
             .populate('department')

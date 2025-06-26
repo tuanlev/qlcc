@@ -31,6 +31,11 @@ const userSchema = new mongoose.Schema({
   device: {
     type: String,
     ref:"Devices"
+  },
+  employee: {
+    type: String,
+    ref: "Employees",
+    unique:false
   }
 
 }, {

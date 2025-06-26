@@ -7,4 +7,5 @@ routes.use("/shifts",shiftRoute);
 routes.use("/departments",departmentRoute);
 routes.use("/positions",positionRoute)
 routes.use("/auth", require("./auth.route"));
+routes.use("/users", require("./user.route"));
 module.exports = routes;

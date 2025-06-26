@@ -8,8 +8,7 @@ const positionSchema = new mongoose.Schema({
   },
   department: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Departments',
-    required: true
+    ref: 'Departments'
   }
 });
 

@@ -1,18 +1,21 @@
 const { LoadUserByUsername } = require("../service/user.service");
 const jwtUtils = require("../utils/jwtUtils")
 exports.authorizeAdmin = async (req, res, next) => {
-    let token = req.get("authorization");
+    let token = req.get("Authorization");
     try {
         if (token) {
             const data = jwtUtils.decode(token);
-            res.set("authorization", jwtUtils.encode(data));
+            const newToken =jwtUtils.encode(data);
+            res.set("Authorization",newToken );
             const user = await LoadUserByUsername(data.username);
             req.authRole = user.role;
             if (user.role == "admin") {
-                req.grantedAuthority = devices
+                req.grantedAuthority = data.deviceId
             }
+            req.user = data
             next()
         }
+        else next()
     } catch (e) {
         console.error("Authorization error:", e.message);
         next()
