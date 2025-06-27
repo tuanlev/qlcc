@@ -1,5 +1,6 @@
 const { addYears } = require('date-fns/addYears');
 const Employee = require('../models/employee.model'); // hoặc đúng đường dẫn bạn có
+const { employeeDTO } = require('../dtos/employee.dto');
 
 exports.getEmployees = async ({ departmentId, keyword, deviceId }) => {
     const filter = {};
@@ -23,10 +24,11 @@ exports.getEmployees = async ({ departmentId, keyword, deviceId }) => {
             .populate('department')
             .populate('position')
             .populate('shift')
-            .populate('userId')
             .populate('device');
-
-        return employees;
+        if (!employees || employees.length === 0) {
+            throw new Error('No employees found');
+        }
+        return employees.map(r=>employeeDTO(r));
     } catch (error) {
         throw new Error('employee.service.error: ' + error.message);
     }

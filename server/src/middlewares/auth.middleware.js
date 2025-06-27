@@ -10,8 +10,9 @@ exports.authorizeAdmin = async (req, res, next) => {
             const user = await LoadUserByUsername(data.username);
             req.authRole = user.role;
             if (user.role == "admin") {
-                req.grantedAuthority = data.deviceId
+                req.grantedAuthority = user.device;
             }
+            console.log("req.grantedAuthority: " + req.grantedAuthority);
             req.user = data
             next()
         }

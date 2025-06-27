@@ -14,7 +14,10 @@ require("./config/socket").initialize(server);
 require("./config/db")();
 require("./config/mqtt").connect(server);
 app.use(express.json())
-app.use(cors())
+
+app.use(cors({
+  exposedHeaders: ['Authorization'] // 👈 cho phép frontend thấy header này
+}))
 app.use(authorizeAdmin)
 app.use("/api",routes)
 app.use(errorHandling)
