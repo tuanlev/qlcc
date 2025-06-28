@@ -8,7 +8,7 @@ exports.departmentDTO = ({ _id, name }) => {
 exports.departmentDTOtoDepartment = ({ departmentId, nameDepartment }) => {
     const result = {};
     if (departmentId) result._id = departmentId;
-    nameDepartment= (nameDepartment=="")?null:nameDepartment;
+    nameDepartment= (nameDepartment)?null:nameDepartment;
     if (nameDepartment || nameDepartment=="") result.name = nameDepartment;
     return result
 };

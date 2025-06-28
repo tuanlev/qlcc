@@ -3,10 +3,11 @@ let io;
 function initialize(server) {
     io = new Server(server, {
         cors: {
-            origin: "*",
+            origin: ["https://admin.socket.io"],
             methods: ["GET", "POST"]
         }
     });
+    
     io.on('connection', (socket) => {
         console.log('Client connected:', socket.id);
 
@@ -21,4 +22,4 @@ function getIo() {
     else
         return io;
 }
-module.exports = {initialize, getIo};
+module.exports = { initialize, getIo };

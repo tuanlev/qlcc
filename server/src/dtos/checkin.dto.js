@@ -1,5 +1,6 @@
 const Checkin = require("../models/checkin.model");
 const { deviceDTO } = require("./device.dto");
+const { employeeDTO } = require("./employee.dto");
 
 exports.CheckinDTO = ({ device, timestamp, employee,faceBase64 }) => {
     const result = {};

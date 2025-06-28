@@ -12,7 +12,7 @@ async function handleMessage(topic, message) {
         try {
         await addDevice({deviceId:eventData.deviceId});
         } catch (e) {
-            console.error('mqtt.service.handleMessage.addDevice.error', e.message);
+            console.error('add device if not exist', e.message);
         }
         if (!cmd) {
             console.error('Missing cmd in message:', eventData);
@@ -28,6 +28,11 @@ async function handleMessage(topic, message) {
 
             };
             const result = await addCheckin(processedData);
+            const io = getIo();
+            if (io) {
+                io.emit('checkin', result);
+            }
+            else console.error('Socket.IO not initialized');
             console.log("mqtt.service.handleMessage.log.success" + result);
 
             // await addShiftRecord(result);

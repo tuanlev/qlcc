@@ -4,10 +4,13 @@ const Device = require("../models/device.model")
 
 exports.addDevice = async (device) => {
     try {
-        console.log("device.service.addDevice: ", device);
+        const existingDevice = await Device.findById(device._id);
+        if (existingDevice) {
+            throw new Error("Device with this ID already exists");
+        }
         return await (new Device(deviceDTOtoDevice(device))).save();
     } catch (e) {
-        throw new Error("device.service.adddevice.error:" + e.message)
+        throw new Error("adddevice.error:" + e.message)
     }
 
 }
@@ -24,20 +27,20 @@ exports.getDeviceById = async (deviceId) => {
     try {
         return deviceDTO(await Device.findById(deviceId));
     } catch (e) {
-        throw new Error("device.service.getDeviceById.error:" + e.message)
+        throw new Error("getDeviceById.error:" + e.message)
     }
 }
 exports.updateDeviceById = async (deviceId, device) => {
     try {
         return deviceDTO(await Device.findByIdAndUpdate(deviceId, deviceDTOtoDevice(device), { new: true }));
     } catch (e) {
-        throw new Error("device.service.updateDeviceById.error:" + e.message)
+        throw new Error("updateDeviceById.error:" + e.message)
     }
 }
 exports.deleteDeviceById = async (deviceId) => {
     try {
         return deviceDTO(await Device.findByIdAndDelete(deviceId));
     } catch (e) {
-        throw new Error("device.service.deleteDeviceById.error:" + e.message)
+        throw new Error("deleteDeviceById.error:" + e.message)
     }
 }

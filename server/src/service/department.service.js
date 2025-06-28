@@ -9,7 +9,8 @@ exports.getDepartments = async (keyword = null) => {
                 { name: { $regex: keyword, $options: 'i' } }
             ];
         }
-        const result = await Department.find(query);
+        const result = await Department.find(query).sort({ updatedAt: -1 });
+;
         return result.map(r => departmentDTO(r))
     } catch (e) {
         throw new Error("department.service.getDepartments.error: " + e.message);

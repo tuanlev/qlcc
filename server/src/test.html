@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Socket.IO Test</title>
+  <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+</head>
+<body>
+  <h1>Socket.IO Client Test</h1>
+  <p id="status">ddd...</p>
+
+  <script>
+    // 👉 Thay đổi URL theo địa chỉ server bạn
+    const socket = io("http://localhost:3002", {
+      transports: ["websocket"], // option nếu bạn muốn dùng WS thuần
+    });
+
+    socket.on("connection", () => {
+      console.log("✅ Connected! Socket ID:", socket.id);
+      document.getElementById("status").innerText = "Connected: " + socket.id;
+    });
+
+    socket.on("disconnect", () => {
+      console.log("❌ Disconnected");
+      document.getElementById("status").innerText = "Disconnected";
+    });
+
+    // Ví dụ: Nếu server phát thử 1 sự kiện
+    socket.on("checkin", (data) => {
+      console.log("📢 Server notifyAll:", data);
+    });
+  </script>
+</body>
+</html>

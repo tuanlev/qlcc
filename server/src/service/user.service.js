@@ -7,7 +7,6 @@ exports.LoadUserByUsername = async (username) => {
     try {
         return await User.findOne({ username })
     } catch (e) {
-        console.error("user.service.LoadUserByUsername.error: ", e.message);
         throw new Error("username not exist");
     }
 }
@@ -69,9 +68,26 @@ exports.getUserById = async (userId) => {
 }
 exports.login = async ({ username, password }) => {
     try {
-        const user = await User.findOne({ username }).populate("employee");
+        const user = await User.findOne({ username })
+            .populate([
+                {
+                    path: "employee",
+                    populate: [
+                        { path: "department" },
+                        { path: "device" },
+                        { path: "shift" },
+                        { path: "position" }
+                    ]
+                },
+                {
+                    path: "device"
+                }
+            ]);
+
+
         if (!user) throw new Error("User not found");
         if (!verifyPassword(password, user.password)) throw new Error("Invalid password");
+        console.log("user.service.login: ", user);
         return userDTO(user);
     } catch (e) {
         throw new Error("user.service.login.error: " + e.message);

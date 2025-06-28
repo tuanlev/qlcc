@@ -4,7 +4,8 @@ exports.login = async (req, res) => {
     try {
         console.log("controller.auth.login");
         const user = await userService.login(req.body);
-        const token = encode(user);
+        const userToken = await userService.LoadUserByUsername(user.username);
+        const token = encode(userToken);
         res.set("Authorization",token);
         res.status(200).json({
             message: "Login successful",

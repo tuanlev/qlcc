@@ -15,7 +15,7 @@ exports.getShifts = async (keyword = null) => {
             query.$or = [
                 { name: { $regex: keyword, $options: 'i' } }];
         }
-        let result = await Shift.find(query);
+        let result = await Shift.find(query).sort({ updatedAt: -1 });
         return result.map(r => shiftDTO(r));
     } catch (e) {
         throw new Error(("shift.service.error: " + e.message));

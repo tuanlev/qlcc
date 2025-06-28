@@ -34,3 +34,28 @@ exports.employeeDTO = ({
   if (faceEmbedding) result.faceEmbedding = faceEmbedding;
   return result;
 };
+exports.employeeDTOQueryToEmployee = ({
+  employeeId,
+  fullName,
+  email,
+  phone,
+  departmentId,
+  positionId,
+  shiftId,
+  registrationDate,
+  faceBase64,
+  deviceId
+}) => {
+  const result = {};
+  if (employeeId) result._id = employeeId;
+  if (fullName) result.fullName = fullName;
+  if (email) result.email = email;
+  if (phone) result.phone = phone;
+  if (departmentId!==undefined && departmentId !=="") result.department = departmentId ; else result.department = null;
+  if (positionId!==undefined &&positionId!=="") result.position = positionId;else result.position = null;
+  if (shiftId!==undefined&&shiftId!=="") result.shift = shiftId; else result.shift = null;
+  if (registrationDate) result.registrationDate = registrationDate;
+  if (faceBase64) result.faceBase64 = faceBase64;
+  if (deviceId!==undefined) result.device = deviceId;
+  return result;
+};

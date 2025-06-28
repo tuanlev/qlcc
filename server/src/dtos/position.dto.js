@@ -11,7 +11,7 @@ exports.positionDTOQueryToPosition = ({ positionId, namePosition, departmentId }
     const result = {};
     if (positionId) result._id = positionId;
     if (namePosition) result.name = namePosition;
-    if (departmentId != undefined) result.department = null;
-    if (departmentId)  result.department = departmentId
+    if (departmentId !== undefined) result.department = (departmentId =="")? null : departmentId; // Ensure department is null if not provided
+    else result.department = null; // Ensure department is null if not provided
     return result;
 };

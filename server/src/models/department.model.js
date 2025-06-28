@@ -6,7 +6,8 @@ const departmentSchema = new mongoose.Schema({
     required: true,
     unique: true
   }
-
+ }, {
+  timestamps: true
 });
 
 const Department = mongoose.model('Departments', departmentSchema);
