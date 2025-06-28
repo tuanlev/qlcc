@@ -15,7 +15,7 @@ export function useCheckins() {
   const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:3002"
   const { socket, isConnected, error: socketError } = useSocket(socketUrl)
 
-  // Filter checkins by user's device
+  // Filter checkins by user's device - ALWAYS show checkins even if missing employee data
   const filterCheckinsByDevice = useCallback(
     (checkinsData) => {
       if (!user?.device?.deviceId) {
@@ -85,11 +85,17 @@ export function useCheckins() {
 
             // Add new checkin to the beginning of the list
             setCheckins((prev) => {
+              // Create unique identifier for checkin (handle missing employee data)
+              const getCheckinId = (checkin) => {
+                const employeeId = checkin.employee?.employeeId || "unknown"
+                const timestamp = checkin.timestamp || Date.now()
+                const deviceId = checkin.devide?.deviceId || checkin.device?.deviceId || "unknown"
+                return `${employeeId}-${timestamp}-${deviceId}`
+              }
+
               // Check if this checkin already exists to avoid duplicates
-              const exists = prev.some(
-                (checkin) =>
-                  checkin.employee?.employeeId === data.employee?.employeeId && checkin.timestamp === data.timestamp,
-              )
+              const newCheckinId = getCheckinId(data)
+              const exists = prev.some((checkin) => getCheckinId(checkin) === newCheckinId)
 
               if (exists) {
                 console.log("Checkin already exists, skipping...")
@@ -120,11 +126,18 @@ export function useCheckins() {
 
           if (checkinDeviceId === userDeviceId) {
             setCheckins((prev) =>
-              prev.map((checkin) =>
-                checkin.employee?.employeeId === data.employee?.employeeId && checkin.timestamp === data.timestamp
-                  ? data
-                  : checkin,
-              ),
+              prev.map((checkin) => {
+                // More flexible matching for updates
+                const employeeMatch =
+                  (checkin.employee?.employeeId &&
+                    data.employee?.employeeId &&
+                    checkin.employee.employeeId === data.employee.employeeId) ||
+                  (!checkin.employee?.employeeId && !data.employee?.employeeId)
+
+                const timestampMatch = checkin.timestamp === data.timestamp
+
+                return employeeMatch && timestampMatch ? data : checkin
+              }),
             )
           }
         } catch (err) {

@@ -2,6 +2,7 @@
  * Component bảng check-in real-time
  * Hiển thị thông tin check-in real-time của nhân viên qua WebSocket
  * Chỉ hiển thị check-in từ thiết bị của user hiện tại
+ * Hiển thị tất cả check-in kể cả khi thiếu thông tin employee
  */
 "use client"
 
@@ -14,7 +15,18 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
 import { useCheckins } from "@/hooks/use-checkins"
-import { Search, RefreshCw, Wifi, WifiOff, Clock, Building, Briefcase, Monitor, User } from "lucide-react"
+import {
+  Search,
+  RefreshCw,
+  Wifi,
+  WifiOff,
+  Clock,
+  Building,
+  Briefcase,
+  Monitor,
+  User,
+  AlertTriangle,
+} from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 
 export function RealtimeCheckinTable() {
@@ -22,7 +34,7 @@ export function RealtimeCheckinTable() {
   const [searchTerm, setSearchTerm] = useState("")
   const [departmentFilter, setDepartmentFilter] = useState("all")
 
-  // Extract unique departments from checkins
+  // Extract unique departments from checkins (handle missing data)
   const departments = useMemo(() => {
     const deptSet = new Set()
     checkins.forEach((checkin) => {
@@ -33,13 +45,25 @@ export function RealtimeCheckinTable() {
     return Array.from(deptSet)
   }, [checkins])
 
-  // Filter checkins based on search and department
+  // Filter checkins based on search and department (handle missing employee data)
   const filteredCheckins = useMemo(() => {
     return checkins.filter((checkin) => {
       const employee = checkin.employee
-      if (!employee) return false
 
+      // If no search term and no department filter, show all checkins
+      if (!searchTerm && departmentFilter === "all") {
+        return true
+      }
+
+      // If employee data is missing but we have search/filter criteria
+      if (!employee) {
+        // Only show if no specific search/filter is applied
+        return !searchTerm && departmentFilter === "all"
+      }
+
+      // Normal filtering with employee data
       const matchesSearch =
+        !searchTerm ||
         employee.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         employee.employeeId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         employee.email?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -110,6 +134,14 @@ export function RealtimeCheckinTable() {
         {shift.nameShift}
       </Badge>
     )
+  }
+
+  // Generate unique key for checkin row
+  const getCheckinKey = (checkin, index) => {
+    const employeeId = checkin.employee?.employeeId || `unknown-${index}`
+    const timestamp = checkin.timestamp || Date.now()
+    const deviceId = checkin.devide?.deviceId || checkin.device?.deviceId || "unknown"
+    return `${employeeId}-${timestamp}-${deviceId}-${index}`
   }
 
   if (loading) {
@@ -274,46 +306,83 @@ export function RealtimeCheckinTable() {
                 ) : (
                   filteredCheckins.map((checkin, index) => {
                     const employee = checkin.employee
+                    const hasEmployeeData = !!employee
+
                     return (
-                      <TableRow key={`${employee?.employeeId}-${checkin.timestamp}-${index}`}>
-                        <TableCell className="font-mono text-sm">{employee?.employeeId?.slice(-8) || "-"}</TableCell>
+                      <TableRow key={getCheckinKey(checkin, index)} className={!hasEmployeeData ? "bg-yellow-50" : ""}>
+                        <TableCell className="font-mono text-sm">
+                          {hasEmployeeData ? (
+                            employee.employeeId?.slice(-8) || "-"
+                          ) : (
+                            <div className="flex items-center gap-1">
+                              <AlertTriangle className="h-3 w-3 text-yellow-600" />
+                              <span className="text-yellow-600">N/A</span>
+                            </div>
+                          )}
+                        </TableCell>
 
                         <TableCell className="font-medium">
                           <div className="flex items-center">
                             <Avatar className="mr-2 h-8 w-8">
-                              <AvatarFallback>
-                                {employee?.fullName ? employee.fullName.substring(0, 2).toUpperCase() : "NV"}
+                              <AvatarFallback className={!hasEmployeeData ? "bg-yellow-100 text-yellow-600" : ""}>
+                                {hasEmployeeData && employee.fullName
+                                  ? employee.fullName.substring(0, 2).toUpperCase()
+                                  : "??"}
                               </AvatarFallback>
                             </Avatar>
-                            {employee?.fullName || "-"}
+                            {hasEmployeeData ? (
+                              employee.fullName || "-"
+                            ) : (
+                              <span className="text-yellow-600 italic">Không có thông tin nhân viên</span>
+                            )}
                           </div>
                         </TableCell>
 
-                        <TableCell>{employee?.email || "-"}</TableCell>
+                        <TableCell>
+                          {hasEmployeeData ? employee.email || "-" : <span className="text-yellow-600">-</span>}
+                        </TableCell>
 
                         <TableCell>
-                          {employee?.department ? (
+                          {hasEmployeeData && employee.department ? (
                             <Badge variant="outline" className="flex items-center w-fit">
                               <Building className="mr-1 h-3 w-3" />
                               {employee.department.nameDepartment}
                             </Badge>
                           ) : (
-                            <Badge variant="secondary">Chưa có</Badge>
+                            <Badge
+                              variant="secondary"
+                              className={!hasEmployeeData ? "bg-yellow-100 text-yellow-600" : ""}
+                            >
+                              {!hasEmployeeData ? "Không có dữ liệu" : "Chưa có"}
+                            </Badge>
                           )}
                         </TableCell>
 
                         <TableCell>
-                          {employee?.position ? (
+                          {hasEmployeeData && employee.position ? (
                             <Badge variant="outline" className="flex items-center w-fit">
                               <Briefcase className="mr-1 h-3 w-3" />
                               {employee.position.namePosition}
                             </Badge>
                           ) : (
-                            <Badge variant="secondary">Chưa có</Badge>
+                            <Badge
+                              variant="secondary"
+                              className={!hasEmployeeData ? "bg-yellow-100 text-yellow-600" : ""}
+                            >
+                              {!hasEmployeeData ? "Không có dữ liệu" : "Chưa có"}
+                            </Badge>
                           )}
                         </TableCell>
 
-                        <TableCell>{getShiftBadge(employee?.shift)}</TableCell>
+                        <TableCell>
+                          {hasEmployeeData ? (
+                            getShiftBadge(employee.shift)
+                          ) : (
+                            <Badge variant="secondary" className="bg-yellow-100 text-yellow-600">
+                              Không có dữ liệu
+                            </Badge>
+                          )}
+                        </TableCell>
 
                         <TableCell>
                           {checkin.devide || checkin.device ? (

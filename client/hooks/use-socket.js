@@ -25,7 +25,8 @@ export function useSocket(url) {
         autoConnect: true,
       })
 
-      socketInstance.on("connection", () => {
+      // ✅ FIXED: Use "connect" instead of "connection" for client
+      socketInstance.on("connect", () => {
         console.log("Socket.IO connected:", socketInstance.id)
         setIsConnected(true)
         setError(null)
