@@ -2,7 +2,7 @@ const { getShifts, getShiftById, updateShift, addShift, deleteShiftById } = requ
 
 exports.getShifts = async (req, res, next) => {
       if (req.authRole != "admin") {
-            res.status(404).json({
+            res.status(401).json({
                 message: "Unauthorized: You do not have permission to access this resource"
             });
             return;
@@ -16,12 +16,12 @@ exports.getShifts = async (req, res, next) => {
         })
     }
     catch (e) {
-        next(new Error("shift.controller.getShifts.error: " + e.message));
+        next(e);
     }
 }
 exports.addShift = async (req, res, next) => {
       if (req.authRole != "admin") {
-            res.status(404).json({
+            res.status(401).json({
                 message: "Unauthorized: You do not have permission to access this resource"
             });
             return;
@@ -33,13 +33,13 @@ exports.addShift = async (req, res, next) => {
             message: "success"
         })
     } catch (e) {
-        next(new Error("shift.controller.addShift.error: " + e.message));
+        next(e);
 
     }
 }
 exports.getShiftsById = async (req, res, next) => {
       if (req.authRole != "admin") {
-            res.status(404).json({
+            res.status(401).json({
                 message: "Unauthorized: You do not have permission to access this resource"
             });
             return;
@@ -53,12 +53,12 @@ exports.getShiftsById = async (req, res, next) => {
         })
     }
     catch (e) {
-        next(new Error("shift.controller.getShiftsById.error: " + e.message));
+        next(e);
     }
 }
 exports.deleteShiftById = async (req, res, next) => {
       if (req.authRole != "admin") {
-            res.status(404).json({
+            res.status(401).json({
                 message: "Unauthorized: You do not have permission to access this resource"
             });
             return;
@@ -72,12 +72,12 @@ exports.deleteShiftById = async (req, res, next) => {
         })
     }
     catch (e) {
-        next(new Error("shift.controller.getShiftsById.error: " + e.message));
+        next(e);
     }
 }
 exports.updateShiftById = async (req, res, next) => {
       if (req.authRole != "admin") {
-            res.status(404).json({
+            res.status(401).json({
                 message: "Unauthorized: You do not have permission to access this resource"
             });
             return;
@@ -91,6 +91,6 @@ exports.updateShiftById = async (req, res, next) => {
         })
     }
     catch (e) {
-        next(new Error("shift.controller.getShiftsById.error: " + e.message));
+        next(e);
     }
 }

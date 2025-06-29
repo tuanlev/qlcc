@@ -67,9 +67,8 @@ axiosInstance.interceptors.response.use(
   },
   (error) => {
     // Handle 401/403 errors
-    if (error.response?.status === 403 ) {
+    if (error.response?.status === 403 || error.response?.status === 401) {
       clearAuthData()
-
       // Dispatch custom event to notify auth context
       window.dispatchEvent(new CustomEvent("auth-logout"))
 

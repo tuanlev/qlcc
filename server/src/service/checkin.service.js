@@ -1,10 +1,11 @@
+const { CustomError } = require("../../error/customError");
 const { CheckinDTO } = require("../dtos/checkin.dto");
 const Checkin = require("../models/checkin.model");
 
 exports.getCheckins = async (deviceId) => {
     try {
         if (!deviceId) {
-            throw new Error("Device ID is required");
+            throw new CustomError("Device ID is required",400);
         }
         let checkins = await Checkin.find({ device: deviceId })
             .populate([
@@ -23,6 +24,6 @@ exports.getCheckins = async (deviceId) => {
         checkins = checkins.map(checkin => CheckinDTO(checkin));
         return checkins;
     } catch (e) {
-        throw new Error("getCheckins.error: " + e.message);
+        throw new CustomError("getCheckins.error: " + e.message,500);
     }
 }

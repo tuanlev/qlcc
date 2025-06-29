@@ -2,7 +2,7 @@ const departmentService = require("../service/department.service")
 
 exports.getDepartments = async (req, res, next) => {
     if (req.authRole != "admin") {
-        res.status(404).json({
+        res.status(401).json({
             message: "Unauthorized: You do not have permission to access this resource"
         });
         return;
@@ -17,13 +17,13 @@ exports.getDepartments = async (req, res, next) => {
         })
     }
     catch (e) {
-        next(new Error("department.controller.getDepartments.error: " + e.message));
+        next(e);
     }
 }
 exports.addDepartment = async (req, res, next) => {
 
         if (req.authRole != "admin") {
-            res.status(404).json({
+            res.status(401).json({
                 message: "Unauthorized: You do not have permission to access this resource"
             });
             return;
@@ -35,13 +35,13 @@ exports.addDepartment = async (req, res, next) => {
                 message: "success"
             })
         } catch (e) {
-            next(new Error("department.controller.addDepartment.error: " + e.message));
+            next(e);
 
         }
     }
 exports.getDepartmentsById = async (req, res, next) => {
      if (req.authRole != "admin") {
-            res.status(404).json({
+            res.status(401).json({
                 message: "Unauthorized: You do not have permission to access this resource"
             });
             return;
@@ -55,7 +55,7 @@ exports.getDepartmentsById = async (req, res, next) => {
             })
         }
         catch (e) {
-            next(new Error("department.controller.getDepartmentsById.error: " + e.message));
+            next(e);
         }
     }
     exports.deleteDepartment = async (req, res, next) => {
@@ -74,12 +74,12 @@ exports.getDepartmentsById = async (req, res, next) => {
             })
         }
         catch (e) {
-            next(new Error("department.controller.getDepartmentsById.error: " + e.message));
+            next(e);
         }
     }
     exports.updateDepartmentById = async (req, res, next) => {
          if (req.authRole != "admin") {
-            res.status(404).json({
+            res.status(401).json({
                 message: "Unauthorized: You do not have permission to access this resource"
             });
             return;
@@ -93,6 +93,6 @@ exports.getDepartmentsById = async (req, res, next) => {
             })
         }
         catch (e) {
-            next(new Error("department.controller.getDepartmentsById.error: " + e.message));
+            next(e);
         }
     }

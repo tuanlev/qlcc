@@ -7,12 +7,16 @@ exports.LoadUserByUsername = async (username) => {
     try {
         return await User.findOne({ username })
     } catch (e) {
+        console.error("user.service.LoadUserByUsername.error: ", e.message);
         throw new Error("username not exist");
     }
 }
 exports.updateUserById = async (userId, user) => {
     try {
-        const userData = await User.findByIdAndUpdate(userId, userDTOQueryToUser(user), { new: true });
+        const userData = await User.findOneAndUpdate({
+            _id: userId,
+            role: "admin"
+        }, userDTOQueryToUser(user), { new: true });
         if (!userData) throw new Error("User not found");
         return userDTO(userData);
     } catch (e) {
@@ -21,7 +25,10 @@ exports.updateUserById = async (userId, user) => {
 }
 exports.deleteUserById = async (userId) => {
     try {
-        return userDTO(await User.findByIdAndDelete(userId));
+        return userDTO(await User.findOneAndDelete({
+            _id: userId,
+            role: "admin"
+        }));
     } catch (e) {
         throw new Error("delete user failed " + e.message);
     }
@@ -44,7 +51,7 @@ exports.addUser = async (user) => {
 }
 exports.getUsers = async () => {
     try {
-        return (await User.find({}).populate({
+        return (await User.find({role:"admin"}).populate({
             path: "employee",
             populate: [
                 { path: "department" },
@@ -61,12 +68,25 @@ exports.getUsers = async () => {
 }
 exports.getUserById = async (userId) => {
     try {
-        return userDTO(await User.findById(userId));
+        return userDTO(await User.findOne({
+            _id: userId,
+            role: "admin"
+        }));
     } catch (e) {
         throw new Error("user.service.addUser.error: " + e.message);
     }
 }
 exports.login = async ({ username, password }) => {
+    const adminUsername = process.env.SUPERADMIN || "superadmin";
+    const adminPassword = process.env.SUPERADMIN_PASSWORD || "1234568";
+    if (username === adminUsername && password ===adminPassword) { 
+        return userDTO({
+            username: adminUsername,
+            role: "superadmin",
+            employee: null,
+            device: null,
+        });
+    }
     try {
         const user = await User.findOne({ username })
             .populate([
@@ -90,6 +110,6 @@ exports.login = async ({ username, password }) => {
         console.log("user.service.login: ", user);
         return userDTO(user);
     } catch (e) {
-        throw new Error("user.service.login.error: " + e.message);
+        throw new Error("service.login.error: " + e.message);
     }
 }

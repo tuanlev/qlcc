@@ -1,3 +1,4 @@
+const { CustomError } = require("../../error/customError");
 const { departmentDTO } = require("../dtos/department.dto");
 const { positionDTO, positionDTOQueryToPosition } = require("../dtos/position.dto");
 const Position = require("../models/position.model");
@@ -15,7 +16,7 @@ exports.getPositions = async ({ departmentId, keyword, }) => {
         }
         return (await Position.find(query).populate("department")).map(r => positionDTO(r));
     } catch (e) { 
-        throw new Error("position.service.getPosition.error: "+ e.message);d
+        throw new Error("getPosition.error: "+ e.message);d
     }
 }
 exports.addPosition = async (position) => {
@@ -25,15 +26,18 @@ exports.addPosition = async (position) => {
        let result =  positionDTO(await Position.findById(positionLastest._id).populate("department"));
        return result;
     } catch (e) { 
-        throw new Error("position.service.addPosition.error: "+ e.message);d
+        throw new Error("addPosition.error: "+ e.message);d
     }
 }
 exports.deletePositionById = async (positionId) => {
     try {
-       await Position.findByIdAndDelete(positionId);
+       if (!await Position.findByIdAndDelete(positionId)) throw new CustomError("Position not found or delete failed",404);
        return;
     } catch (e) { 
-        throw new Error("position.service.addPosition.error: "+ e.message);d
+        if (e instanceof CustomError) {
+            throw e; // Re-throw custom errors
+        }
+        throw new Error("deletePositionById.error: "+ e.message);d
     }
 }
 exports.getPositionById =async (positionId) => {

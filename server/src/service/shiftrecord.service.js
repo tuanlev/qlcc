@@ -1,3 +1,4 @@
+const { shiftRecordDTO } = require("../dtos/shiftRecord.dto");
 const Checkin = require("../models/checkin.model");
 const Department = require("../models/department.model");
 const Employee = require("../models/employee.model");
@@ -8,286 +9,126 @@ const { getDepartments } = require("./department.service");
 
 
 exports.addShiftRecord = async (newCheckin) => {
-    try {
-        const start = new Date();
-        start.setHours(0, 0, 0, 0);
+  try {
+    const now = new Date();
 
-        const end = new Date();
-        end.setHours(23, 59, 59, 999);
-        let checkinExist = await ShiftRecord.findOne({
-            employee: newCheckin.employee,
-            createdAt: {
-                $gte: start,
-                $lt: end
-            }
-        }).populate({
-            path: "employee",
-            populate: {
-                path: "shift",
-            }
-        })
-        console.log(checkinExist)
-        if (!checkinExist) {
-            const employee = await Employee.findById(newCheckin.employee).populate({
-                path: "shift"
-            });
-            if (!employee || !employee.shift) throw new Error("Employee doesn't have shift or employee doesnt exist");
-            const newShiftRecord = {};
-            newShiftRecord.employee = newCheckin.employee;
-            const { checkInDate, checkOutDate } = shiftHoursToDates(employee.shift, newCheckin.timestamp)
+const y = now.getFullYear();
+const m = now.getMonth(); // 0-11
+const d = now.getDate();
 
-            if (dateCompare(checkInDate, newCheckin.timestamp)) {
-                newShiftRecord.checkIn = newCheckin._id;
-                newShiftRecord.checkInStatus = (newCheckin.timestamp.getTime() <= checkInDate.getTime()) ? "on-time" : "late";
-            }
-            else if (dateCompare(checkOutDate, newCheckin.timestamp)) {
-                newShiftRecord.checkOut = newCheckin._id;
-                newShiftRecord.checkOutStatus = (newCheckin.timestamp.getTime() <= checkInDate.getTime()) ? "early-leave" : "on-time";
+const start = new Date(y, m, d, 0, 0, 0, 0);
+const end   = new Date(y, m, d, 23, 59, 59, 999);
 
-            }
-            else throw new Error("addShiftRecord");
-            const newIntance = new ShiftRecord(newShiftRecord);
-            return await newIntance.save();
-        }
-        else {
-            const employee = await Employee.findById(newCheckin.employee).populate({
-                path: "shift"
-            });
-            if (!employee || !employee.shift) throw new Error("Employee doesn't have shift or employee doesnt exist");
-            const { checkInDate, checkOutDate } = shiftHoursToDates(employee.shift, newCheckin.timestamp)
+console.log(start.toISOString()); // 00:00 UTC
+console.log(end.toISOString());   // 23:59 UTC
 
-            if (dateCompare(checkInDate, newCheckin.timestamp) && checkinExist.checkIn) throw new Error("addShiftRecord check both 1");
-            if (dateCompare(checkOutDate, newCheckin.timestamp) && checkinExist.checkOut) throw new Error("addShiftRecord check both 2");
-            if (dateCompare(checkInDate, newCheckin.timestamp)) {
-                checkinExist.checkIn = newCheckin._id;
-                checkinExist.checkInStatus = (newCheckin.timestamp.getTime() <= checkInDate.getTime()) ? "on-time" : "late";
-            }
-            else if (dateCompare(checkOutDate, newCheckin.timestamp)) {
-                checkinExist.checkOut = newCheckin._id;
-                checkinExist.checkInStatus = (newCheckin.timestamp.getTime() <= checkInDate.getTime()) ? "early-leave" : "on-time";
-
-            } else throw new Error("addShiftRecord when exist");
-            return await checkinExist.save();
-        }
-
-
-    } catch (e) {
-        throw new Error("shiftrecord.service.error: " + e.message)
+    let shiftRecordExist = await ShiftRecord.findOne({
+      employee: (newCheckin.employee?.employeeId) ? newCheckin.employee.employeeId : null,
+      createdAt: {
+        $gte: start,
+        $lt: end
+      }
+    }).populate({
+      path: "employee",
+      populate: {
+        path: "shift",
+      }
+    }).populate("shift");
+    if (!shiftRecordExist) {
+      const checkinRecordSave = new ShiftRecord();
+      if (!newCheckin.employee) throw new Error("addShiftRecord: employee not found");
+      checkinRecordSave.employee = (newCheckin.employee?.employeeId) ? newCheckin.employee.employeeId : null;
+      checkinRecordSave.checkIn = newCheckin.checkinId;
+      checkinRecordSave.shift = (newCheckin.employee?.shift?.shiftId) ? newCheckin.employee?.shift.shiftId : null;
+      if (checkinRecordSave.shift) {
+        const { checkInDate } = shiftHoursToDates(checkinRecordSave.newCheckin.employee?.shift, newCheckin.timestamp)
+        checkinRecordSave.checkInStatus = (newCheckin.timestamp.getTime() <= checkInDate.getTime()) ? "on-time" : "late";
+      }
+      else
+        checkinRecordSave.checkInStatus = "Unassigned";
+      await checkinRecordSave.save()
     }
+    else {
+      // Nếu đã có bản ghi, cập nhật checkin
+      let checkinRecordSave = {};
+      checkinRecordSave.checkOut = newCheckin.checkinId;
+      if (shiftRecordExist.shift) {
+        const { checkOutDate } = shiftHoursToDates(shiftRecordExist.shift, newCheckin.timestamp)
+
+        checkinRecordSave.checkOutStatus = (newCheckin.timestamp.getTime() >= checkOutDate.getTime()) ? "on-time" : "erly-leave";
+      }
+      else
+        checkinRecordSave.checkOutStatus = "Unassigned";
+      await ShiftRecord.findByIdAndUpdate(shiftRecordExist._id, checkinRecordSave, { new: true });
+
+    }
+
+
+  } catch (e) {
+    throw new Error("shiftrecord.service.error: " + e.message)
+  }
 }
 
 
-/**
- * Tìm kiếm ShiftRecords với các bộ lọc tùy chọn
- * @param {Object} filters
- * @param {String} [filters.date] - định dạng YYYY-MM-DD
- * @param {String} [filters.departmentId]
- * @param {String} [filters.keyword] - tìm theo employeeId hoặc fullName
- * @param {String} [filters.deviceId]
- */
-exports.getShiftRecordsWithFiltersByDay = async ({ date, departmentId, keyword, deviceId }) =>{
-  const matchConditions = [];
 
-  // Tạo range ngày nếu có
-   if (date) {
-    let start, end;
+exports.getShiftRecordsWithFilters = async ({ day, month, year, deviceId }) => {
+  if (!deviceId) return {};
 
-    if (/^\d{4}$/.test(date)) {
-      // Dạng yyyy
-      start = new Date(`${date}-01-01T00:00:00.000Z`);
-      end = new Date(`${date}-12-31T23:59:59.999Z`);
-    } else if (/^\d{4}-\d{2}$/.test(date)) {
-      // Dạng yyyy-mm
-      const [year, month] = date.split('-');
-      start = new Date(`${year}-${month}-01T00:00:00.000Z`);
 
-      // Tìm ngày cuối cùng của tháng
-      const lastDay = new Date(year, parseInt(month), 0).getDate(); // tháng bắt đầu từ 0 nên không -1
-      end = new Date(`${year}-${month}-${lastDay}T23:59:59.999Z`);
-    } else if (/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-      // Dạng yyyy-mm-dd
-      start = new Date(`${date}T00:00:00.000Z`);
-      end = new Date(`${date}T23:59:59.999Z`);
-    } else {
-      throw new Error("Invalid date format");
-    }
 
-    matchConditions.push({ createdAt: { $gte: start, $lte: end } });
+  try {
+
+ const now = new Date();
+
+  let y, m, d;
+  let start, end;
+
+  if (year && month && day) {
+    // Có đủ 3: tìm trong ngày
+    y = year;
+    m = month-1; // month: 1-12
+    start = new Date(y, m , day, 0, 0, 0, 0);
+    end   = new Date(y, m , day, 23, 59, 59, 999);
+  } else if (year && month) {
+    // Có year + month: tìm trong tháng
+    y = year;
+    m = month-1;
+    start = new Date(y, m , 1, 0, 0, 0, 0);
+    const lastDay = new Date(y, m, 0).getDate();
+    end = new Date(y, m, lastDay, 23, 59, 59, 999);
+  } else if (year) {
+    // Chỉ có year: tìm trong năm
+    y = year;
+    start = new Date(y, 0, 1, 0, 0, 0, 0);
+    end   = new Date(y, 11, 31, 23, 59, 59, 999);
+  } else {
+    // Không có year: tìm trong hôm nay (UTC)
+    y = now.getFullYear();
+    m = now.getMonth();
+    d = now.getDate();
+    start = new Date(y, m, d, 0, 0, 0, 0);
+    end   = new Date(y, m, d, 23, 59, 59, 999);
   }
+    const employees = await Employee.find({ device: deviceId }).select('_id');
+    const shiftRecords = await ShiftRecord.find({
+      employee: { $in: employees.map(e => e._id) },
+      createdAt: { $gte: start, $lt: end }
+    })
+      .populate({
+        path: "employee",
+        populate: ["shift", "department", "device", {
+          path: "position",
+          populate: ["department"]
+        }]
+      }).populate("shift").populate("checkIn")
+      .populate("checkOut").sort({ createdAt: -1 });
 
-  const pipeline = [
-    ...(matchConditions.length ? [{ $match: { $and: matchConditions } }] : []),
+    const dataReturn = shiftRecords.map(r => shiftRecordDTO(r));
+    return dataReturn;
 
-    // Join employee
-    {
-      $lookup: {
-        from: 'employees',
-        localField: 'employee',
-        foreignField: '_id',
-        as: 'employee'
-      }
-    },
-    { $unwind: '$employee' },
 
-    // Join department
-    {
-      $lookup: {
-        from: 'departments',
-        localField: 'employee.department',
-        foreignField: '_id',
-        as: 'employee.department'
-      }
-    },
-    { $unwind: { path: '$employee.department', preserveNullAndEmptyArrays: true } },
-
-    // Join checkIn
-    {
-      $lookup: {
-        from: 'checkins',
-        localField: 'checkIn',
-        foreignField: '_id',
-        as: 'checkIn'
-      }
-    },
-    { $unwind: { path: '$checkIn', preserveNullAndEmptyArrays: true } },
-
-    // Join checkOut
-    {
-      $lookup: {
-        from: 'checkins',
-        localField: 'checkOut',
-        foreignField: '_id',
-        as: 'checkOut'
-      }
-    },
-    { $unwind: { path: '$checkOut', preserveNullAndEmptyArrays: true } },
-
-    // Match theo employee.device, department, keyword
-    {
-      $match: {
-        ...(departmentId && {
-          'employee.department._id': new mongoose.Types.ObjectId(departmentId)
-        }),
-        ...(deviceId && {
-          'employee.device': deviceId
-        }),
-        ...(keyword && {
-          $or: [
-            { 'employee._id': { $regex: keyword, $options: 'i' } },
-            { 'employee.fullName': { $regex: keyword, $options: 'i' } }
-          ]
-        })
-      }
-    },
-
-    // Project kết quả
-    {
-      $project: {
-        employeeId: '$employee._id',
-        employeeName: '$employee.fullName',
-        departmentName: '$employee.department.name',
-        deviceId: '$employee.device',
-        checkInTime: '$checkIn.timestamp',
-        checkOutTime: '$checkOut.timestamp',
-        checkInStatus: 1,
-        checkOutStatus: 1,
-        createdAt: 1
-      }
-    }
-  ];
-
-  return await ShiftRecord.aggregate(pipeline);
-}
-exports.getShiftRecordsWithFiltersByMonth = async ({ date, departmentId, keyword, deviceId }) =>{
-  const matchConditions = [];
-
-  // Tạo range ngày nếu có
-  if (date) {
-    const start = new Date(`${date}T00:00:00.000Z`);
-    const end = new Date(`${date}T23:59:59.999Z`);
-    matchConditions.push({ createdAt: { $gte: start, $lte: end } });
   }
-
-  const pipeline = [
-    ...(matchConditions.length ? [{ $match: { $and: matchConditions } }] : []),
-
-    // Join employee
-    {
-      $lookup: {
-        from: 'employees',
-        localField: 'employee',
-        foreignField: '_id',
-        as: 'employee'
-      }
-    },
-    { $unwind: '$employee' },
-
-    // Join department
-    {
-      $lookup: {
-        from: 'departments',
-        localField: 'employee.department',
-        foreignField: '_id',
-        as: 'employee.department'
-      }
-    },
-    { $unwind: { path: '$employee.department', preserveNullAndEmptyArrays: true } },
-
-    // Join checkIn
-    {
-      $lookup: {
-        from: 'checkins',
-        localField: 'checkIn',
-        foreignField: '_id',
-        as: 'checkIn'
-      }
-    },
-    { $unwind: { path: '$checkIn', preserveNullAndEmptyArrays: true } },
-
-    // Join checkOut
-    {
-      $lookup: {
-        from: 'checkins',
-        localField: 'checkOut',
-        foreignField: '_id',
-        as: 'checkOut'
-      }
-    },
-    { $unwind: { path: '$checkOut', preserveNullAndEmptyArrays: true } },
-
-    // Match theo employee.device, department, keyword
-    {
-      $match: {
-        ...(departmentId && {
-          'employee.department._id': new mongoose.Types.ObjectId(departmentId)
-        }),
-        ...(deviceId && {
-          'employee.device': deviceId
-        }),
-        ...(keyword && {
-          $or: [
-            { 'employee._id': { $regex: keyword, $options: 'i' } },
-            { 'employee.fullName': { $regex: keyword, $options: 'i' } }
-          ]
-        })
-      }
-    },
-
-    // Project kết quả
-    {
-      $project: {
-        employeeId: '$employee._id',
-        employeeName: '$employee.fullName',
-        departmentName: '$employee.department.name',
-        deviceId: '$employee.device',
-        checkInTime: '$checkIn.timestamp',
-        checkOutTime: '$checkOut.timestamp',
-        checkInStatus: 1,
-        checkOutStatus: 1,
-        createdAt: 1
-      }
-    }
-  ];
-
-  return await ShiftRecord.aggregate(pipeline);
+  catch (e) {
+    throw new Error("getShiftRecordsWithFiltersByDay.error: " + e.message);
+  }
 }

@@ -1,7 +1,7 @@
 const deviceService = require("../service/device.service");
 exports.getDevices = async (req, res, next) => {
     if (req.authRole != "superadmin") {
-        res.status(404).json({
+        res.status(401).json({
             message: "Unauthorized: You do not have permission to access this resource"
         });
         return;
@@ -13,12 +13,12 @@ exports.getDevices = async (req, res, next) => {
             data: devices
         });
     } catch (e) {
-        next(new Error("device.controller.getDevices.error: " + e.message));
+        next(e);
     }
 }
 exports.addDevice = async (req, res, next) => {
     if (req.authRole != "superadmin") {
-        res.status(404).json({
+        res.status(401).json({
             message: "Unauthorized: You do not have permission to access this resource"
         });
         return;
@@ -30,12 +30,12 @@ exports.addDevice = async (req, res, next) => {
             data: device
         });
     } catch (e) {
-        next(new Error("device.controller.addDevice.error: " + e.message));
+        next(e);
     }
 }
 exports.getDeviceById = async (req, res, next) => {
     if (req.authRole != "superadmin") {
-        res.status(404).json({
+        res.status(403).json({
             message: "Unauthorized: You do not have permission to access this resource"
         });
         return;
@@ -47,12 +47,12 @@ exports.getDeviceById = async (req, res, next) => {
             data: device
         });
     } catch (e) {
-        next(new Error("device.controller.getDeviceById.error: " + e.message));
+        next(e);
     }
 }
 exports.updateDeviceById = async (req, res, next) => {
     if (req.authRole != "superadmin") {
-        res.status(404).json({
+        res.status(403).json({
             message: "Unauthorized: You do not have permission to access this resource"
         });
         return;
@@ -64,12 +64,12 @@ exports.updateDeviceById = async (req, res, next) => {
             data: device
         });
     } catch (e) {
-        next(new Error("device.controller.updateDeviceById.error: " + e.message));
+        next(e);
     }
 }
 exports.deleteDeviceById = async (req, res, next) => {
     if (req.authRole != "superadmin") {
-        res.status(404).json({
+        res.status(403).json({
             message: "Unauthorized: You do not have permission to access this resource"
         });
         return;
@@ -82,6 +82,6 @@ exports.deleteDeviceById = async (req, res, next) => {
         });
     }
     catch (e) {
-        next(new Error("device.controller.deleteDeviceById.error: " + e.message));
+        next(e);
     }
 }

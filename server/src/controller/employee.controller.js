@@ -2,7 +2,7 @@ const employeeService= require("../service/employee.service");
 
 exports.getEmployees = async (req, res, next) => {
     if (req.authRole != "admin") {
-        res.status(404).json({
+        res.status(401).json({
             message: "Unauthorized: You do not have permission to access this resource"
         });
         return;
@@ -23,7 +23,7 @@ exports.getEmployees = async (req, res, next) => {
 }
 exports.getEmployeeById = async (req, res, next) => {
     if (req.authRole != "admin") {
-        res.status(404).json({
+        res.status(401).json({
             message: "Unauthorized: You do not have permission to access this resource"
         });
         return;
@@ -41,7 +41,7 @@ exports.getEmployeeById = async (req, res, next) => {
 }
 exports.addEmployee = async (req, res, next) => {
     if (req.authRole != "admin") {
-        res.status(404).json({
+        res.status(401).json({
             message: "Unauthorized: You do not have permission to access this resource"
         });
         return;
@@ -53,12 +53,12 @@ exports.addEmployee = async (req, res, next) => {
             data: employee
         });
     } catch (e) {
-        next(new Error("employee.controller.addEmployee.error: " + e.message));
+        next(e);
     }   
 }
 exports.updateEmployeeById = async (req, res, next) => {
     if (req.authRole != "admin") {
-        res.status(404).json({
+        res.status(401).json({
             message: "Unauthorized: You do not have permission to access this resource"
         });
         return;
@@ -72,12 +72,12 @@ exports.updateEmployeeById = async (req, res, next) => {
             data: employee
         });
     } catch (e) {
-        next(new Error("employee.controller.updateEmployeeById.error: " + e.message));
+        next(e);
     }   
 }
 exports.deleteEmployeeById = async (req, res, next) => {
     if (req.authRole != "admin") {
-        res.status(404).json({
+        res.status(401).json({
             message: "Unauthorized: You do not have permission to access this resource"
         });
         return;
@@ -89,6 +89,6 @@ exports.deleteEmployeeById = async (req, res, next) => {
             message: "Employee deleted successfully"
         });
     } catch (e) {
-        next(new Error("employee.controller.deleteEmployeeById.error: " + e.message));
+        next(e);
     }
 }

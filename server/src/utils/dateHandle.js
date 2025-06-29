@@ -16,6 +16,7 @@ exports.shiftHoursToDates = (shift, baseDate = new Date()) => {
 
   const checkInDate = new Date(year, month, day, shift.checkInHour, 0, 0);
   const checkOutDate = new Date(year, month, day, shift.checkOutHour, 0, 0);
+  console.log("date",checkInDate,checkOutDate)
 
   return { checkInDate, checkOutDate };
 }

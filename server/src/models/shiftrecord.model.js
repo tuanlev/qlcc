@@ -18,13 +18,17 @@ const shiftRecordSchema = new mongoose.Schema({
   },
   checkInStatus: {
     type: String,
-    enum: ['on-time', 'late', 'absent'],
+    enum: ['on-time', 'late', 'absent',"Unassigned"],
     default: 'absent'
   },
   checkOutStatus: {
     type: String,
-    enum: ['on-time', 'early-leave', 'absent'],
+    enum: ['on-time', 'early-leave','absent', 'Unassigned'],
     default: 'absent'
+  },
+  shift: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Shifts',
   },
 }, {
   timestamps: true

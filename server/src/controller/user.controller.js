@@ -4,7 +4,7 @@ exports.updateUserById = async (req, res) => {
     
     const {userId} = req.params;
     if (!userId) {
-        res.status(400).json({
+        res.status(404).json({
             message: "User ID is required"
         });
         return;
@@ -22,7 +22,7 @@ exports.updateUserById = async (req, res) => {
             data: user
         });
     } catch (e) {
-        res.status(400).json({
+        res.status(401).json({
             message: "Update failed",
             error: e.message
         });
@@ -37,7 +37,7 @@ exports.deleteUserById = async (req, res) => {
     }
     const {userId} = req.params;
     if (!userId) {
-        res.status(400).json({
+        res.status(401).json({
             message: "User ID is required"
         });
         return;
@@ -49,7 +49,7 @@ exports.deleteUserById = async (req, res) => {
             data: user
         });
     } catch (e) {
-        res.status(400).json({
+        res.status(401).json({
             message: "Delete failed",
             error: e.message
         });
@@ -69,7 +69,7 @@ exports.getUsers = async (req, res) => {
             data: users
         });
     } catch (e) {
-        res.status(400).json({
+        res.status(401).json({
             message: "Get users failed",
             error: e.message
         });

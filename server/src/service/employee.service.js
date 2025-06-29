@@ -1,16 +1,15 @@
 const { addYears } = require('date-fns/addYears');
 const Employee = require('../models/employee.model'); // hoặc đúng đường dẫn bạn có
 const { employeeDTO, employeeDTOQueryToEmployee } = require('../dtos/employee.dto');
+const { CustomError } = require('../../error/customError');
 
 exports.getEmployees = async ({ departmentId, keyword, deviceId }) => {
     const filter = {};
-    console.log(deviceId);
     if (keyword) {
         filter.$or = [
             { fullName: { $regex: keyword, $options: 'i' } },
             { _id: { $regex: keyword, $options: 'i' } }
         ];
-
     }
 
     if (departmentId) {
@@ -27,12 +26,9 @@ exports.getEmployees = async ({ departmentId, keyword, deviceId }) => {
             .populate('device')
             .sort({ updatedAt: -1 });
         ;
-        if (!employees || employees.length === 0) {
-            throw new Error('No employees found');
-        }
         return employees.map(r => employeeDTO(r));
     } catch (error) {
-        throw new Error('employee.service.error: ' + error.message);
+        throw new Error('getEmployees.error: ' + error.message);
     }
 };
 exports.getEmployeeById = async (employeeId, deviceId) => {
@@ -44,12 +40,9 @@ exports.getEmployeeById = async (employeeId, deviceId) => {
             .populate('userId')
             .populate('device')
             .sort({ updatedAt: -1 });
-        if (!employee) {
-            throw new Error('Employee not found');
-        }
         return employee;
     } catch (error) {
-        throw new Error('employee.service.getEmployeeById.error: ' + error.message);
+        throw new Error('getEmployeeById.error: ' + error.message);
     }
 };
 exports.addEmployee = async (deviceId,employeeData) => {
@@ -76,10 +69,13 @@ exports.updateEmployeeById = async (employeeId, updateData) => {
             .populate('shift')
             .populate('device');
         if (!updatedEmployee) {
-            throw new Error('Employee not found or update failed');
+            throw new CustomError('Employee not found or update failed',404);
         }
         return employeeDTO(updatedEmployee);
     } catch (error) {
+        if (error instanceof CustomError) {
+            throw error; // Re-throw custom errors
+        }
         throw new Error('updateEmployeeById.error: ' + error.message);
     }
 };
@@ -87,10 +83,13 @@ exports.deleteEmployeeById = async (employeeId) => {
     try {
         const deletedEmployee = await Employee.findByIdAndDelete(employeeId);
         if (!deletedEmployee) {
-            throw new Error('Employee not found or delete failed');
+            throw new CustomError('Employee not found or delete failed',404);
         }
         return { message: 'Employee deleted successfully' };
     } catch (error) {
+        if (error instanceof CustomError) {
+            throw error; // Re-throw custom errors
+        }
         throw new Error('deleteEmployeeById.error: ' + error.message);
     }
 };
