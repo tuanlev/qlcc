@@ -21,7 +21,7 @@ exports.getDevices = async (keyword = null) => {
             { name: { $regex: keyword, $options: 'i' } }
         ];
     }
-    return await Device.find(query);
+    return (await Device.find(query)).map(r=>deviceDTO(r));
 }
 exports.getDeviceById = async (deviceId) => {
     try {

@@ -1,4 +1,5 @@
 const { userDTOQueryToUser, userDTO } = require("../dtos/user.dto");
+const { findByIdAndUpdate } = require("../models/shift.model");
 const User = require("../models/user.model");
 const employeeRepository = require("../repository/employee.repository");
 const { hashPassword, verifyPassword } = require("../utils/passwordHash");
@@ -16,8 +17,9 @@ exports.updateUserById = async (userId, user) => {
         const userData = await User.findOneAndUpdate({
             _id: userId,
             role: "admin"
-        }, userDTOQueryToUser(user), { new: true });
+        }, userDTOQueryToUser(user), { new: true }).populate("employee").populate("device");
         if (!userData) throw new Error("User not found");
+        console.log(userData)
         return userDTO(userData);
     } catch (e) {
         throw new Error("update user failed " + e.message);
@@ -49,9 +51,15 @@ exports.addUser = async (user) => {
         throw new Error("register failed " + e.message);
     }
 }
-exports.getUsers = async () => {
+exports.getUsers = async ({ keyword }) => {
     try {
-        return (await User.find({role:"admin"}).populate({
+        const query = { role: "admin" };
+
+        if (keyword) {
+            query.username = { $regex: keyword, $options: "i" };
+        }
+
+        return (await User.find(query).populate({
             path: "employee",
             populate: [
                 { path: "department" },
@@ -59,7 +67,7 @@ exports.getUsers = async () => {
                 { path: "shift" },
                 { path: "position" }
             ]
-        })
+        }).populate("device").sort({updateAt:-1})
 
         ).map(r => userDTO(r));
     } catch (e) {
@@ -79,7 +87,7 @@ exports.getUserById = async (userId) => {
 exports.login = async ({ username, password }) => {
     const adminUsername = process.env.SUPERADMIN || "superadmin";
     const adminPassword = process.env.SUPERADMIN_PASSWORD || "1234568";
-    if (username === adminUsername && password ===adminPassword) { 
+    if (username === adminUsername && password === adminPassword) {
         return userDTO({
             username: adminUsername,
             role: "superadmin",
@@ -112,4 +120,11 @@ exports.login = async ({ username, password }) => {
     } catch (e) {
         throw new Error("service.login.error: " + e.message);
     }
+}
+exports.resetPassword = async ( userId ) => {
+    const pass = process.env.DEFAULT_PASSWORD || "12345678";
+    const hash = hashPassword(pass);
+   await User.findByIdAndUpdate(userId, { password: hash },{new:true})
+    return;
+
 }

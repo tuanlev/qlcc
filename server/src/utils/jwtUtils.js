@@ -7,7 +7,12 @@ function decode(token) {
         }
         token = token.toString().replace("Bearer ", ""); // Remove 'Bearer ' prefix if present
         const secretKey = process.env.JWT_SECRET;
-        return Jwt.verify(token, secretKey);
+        const data =  Jwt.verify(token, secretKey);
+        return  {
+            role:data.role,
+            username:data.username,
+            device:data.device
+        }
     } catch (e) {
         if (e.name === 'TokenExpiredError') {
             throw new Error('Token expired. Please log in again.');
