@@ -1,17 +1,11 @@
-/**
- * Component quản lý thiết bị
- * Cho phép thêm, xem, chỉnh sửa và xóa các thiết bị trong hệ thống
- */
 "use client"
 
 import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { useDevices } from "@/hooks/use-devices"
-import { Edit, Trash2, Save, X, Monitor, Plus, Search, RefreshCw } from "lucide-react"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import {
   Dialog,
   DialogContent,
@@ -21,20 +15,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Badge } from "@/components/ui/badge"
+import { useDevices } from "@/hooks/use-devices"
+import { Plus, Search, Edit, Trash2, Monitor } from "lucide-react"
 
-export function DeviceManagement() {
+export default function DeviceManagement() {
   const {
     devices,
     loading,
@@ -48,456 +34,216 @@ export function DeviceManagement() {
     refetch,
   } = useDevices()
 
-  // State cho thêm thiết bị mới
-  const [newDevice, setNewDevice] = useState({
-    deviceId: "",
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const [selectedDevice, setSelectedDevice] = useState(null)
+  const [searchInput, setSearchInput] = useState(searchKeyword)
+  const [formData, setFormData] = useState({
     nameDevice: "",
+    deviceStatus: "active",
   })
-  const [showAddDialog, setShowAddDialog] = useState(false)
-  const [isAdding, setIsAdding] = useState(false)
-  const [addError, setAddError] = useState("")
+  const [actionLoading, setActionLoading] = useState(false)
+  const [actionError, setActionError] = useState("")
 
-  // State cho chỉnh sửa
-  const [editingDevice, setEditingDevice] = useState(null)
-  const [editValue, setEditValue] = useState({
-    nameDevice: "",
-  })
-  const [isUpdating, setIsUpdating] = useState(false)
-  const [editError, setEditError] = useState("")
-
-  // State cho tìm kiếm
-  const [localSearchInput, setLocalSearchInput] = useState("")
-
-  // Filter devices based on search
-  const filteredDevices = devices.filter((device) => {
-    const matchesSearch =
-      !searchKeyword ||
-      device.deviceId?.toLowerCase().includes(searchKeyword.toLowerCase()) ||
-      device.nameDevice?.toLowerCase().includes(searchKeyword.toLowerCase())
-
-    return matchesSearch
-  })
-
-  // Reset form thêm mới
-  const resetAddForm = () => {
-    setNewDevice({
-      deviceId: "",
-      nameDevice: "",
-    })
-    setAddError("")
+  const handleSearch = (e) => {
+    e.preventDefault()
+    searchDevices(searchInput)
   }
 
-  // Validate device data
-  const validateDeviceData = (data, isEdit = false) => {
-    if (!isEdit && !data.deviceId?.trim()) {
-      return "Mã thiết bị không được để trống"
-    }
-    if (!data.nameDevice?.trim()) {
-      return "Tên thiết bị không được để trống"
-    }
-    return null
-  }
-
-  // Xử lý thêm thiết bị mới
-  const handleAddDevice = async () => {
-    const validationError = validateDeviceData(newDevice)
-    if (validationError) {
-      setAddError(validationError)
-      return
-    }
-
-    setIsAdding(true)
-    setAddError("")
-
-    try {
-      const deviceData = {
-        deviceId: newDevice.deviceId.trim(),
-        nameDevice: newDevice.nameDevice.trim(),
-      }
-
-      await addDevice(deviceData)
-      resetAddForm()
-      setShowAddDialog(false)
-    } catch (err) {
-      setAddError(err.message)
-      console.error("Error adding device:", err)
-    } finally {
-      setIsAdding(false)
-    }
-  }
-
-  // Xử lý bắt đầu chỉnh sửa thiết bị
-  const startEditDevice = (device) => {
-    setEditingDevice(device.deviceId)
-    setEditValue({
-      nameDevice: device.nameDevice || "",
-    })
-    setEditError("")
-  }
-
-  // Xử lý hủy chỉnh sửa
-  const cancelEdit = () => {
-    setEditingDevice(null)
-    setEditValue({
-      nameDevice: "",
-    })
-    setEditError("")
-  }
-
-  // Xử lý lưu chỉnh sửa thiết bị
-  const saveEditDevice = async () => {
-    const validationError = validateDeviceData(editValue, true)
-    if (validationError) {
-      setEditError(validationError)
-      return
-    }
-
-    setIsUpdating(true)
-    setEditError("")
-
-    try {
-      const updateData = {
-        nameDevice: editValue.nameDevice.trim(),
-      }
-
-      const success = await updateDevice(editingDevice, updateData)
-      if (success) {
-        setEditingDevice(null)
-        setEditValue({
-          nameDevice: "",
-        })
-      }
-    } catch (err) {
-      setEditError(err.message)
-      console.error("Error updating device:", err)
-    } finally {
-      setIsUpdating(false)
-    }
-  }
-
-  // Xử lý xóa thiết bị
-  const handleDeleteDevice = async (deviceId) => {
-    try {
-      await deleteDevice(deviceId)
-    } catch (err) {
-      console.error("Error deleting device:", err)
-    }
-  }
-
-  // Xử lý tìm kiếm
-  const handleSearch = () => {
-    searchDevices(localSearchInput)
-  }
-
-  // Xử lý xóa tìm kiếm
   const handleClearSearch = () => {
-    setLocalSearchInput("")
+    setSearchInput("")
     clearSearch()
   }
 
-  // Format date
-  const formatDate = (dateString) => {
-    if (!dateString) return "-"
+  const handleAddDevice = async (e) => {
+    e.preventDefault()
+    setActionLoading(true)
+    setActionError("")
+
     try {
-      return new Date(dateString).toLocaleDateString("vi-VN")
-    } catch {
-      return "-"
+      await addDevice(formData)
+      await refetch()
+      setIsAddDialogOpen(false)
+      setFormData({ nameDevice: "", deviceStatus: "active" })
+    } catch (err) {
+      setActionError(err.message)
+    } finally {
+      setActionLoading(false)
     }
+  }
+
+  const handleEditDevice = async (e) => {
+    e.preventDefault()
+    if (!selectedDevice) return
+
+    setActionLoading(true)
+    setActionError("")
+
+    try {
+      await updateDevice(selectedDevice.deviceId, formData)
+      await refetch()
+      setIsEditDialogOpen(false)
+      setSelectedDevice(null)
+      setFormData({ nameDevice: "", deviceStatus: "active" })
+    } catch (err) {
+      setActionError(err.message)
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
+  const handleDeleteDevice = async (device) => {
+    if (!confirm(`Bạn có chắc chắn muốn xóa thiết bị "${device.nameDevice}"?`)) {
+      return
+    }
+
+    try {
+      await deleteDevice(device.deviceId)
+      await refetch()
+    } catch (err) {
+      alert(`Lỗi khi xóa thiết bị: ${err.message}`)
+    }
+  }
+
+  const openEditDialog = (device) => {
+    setSelectedDevice(device)
+    setFormData({
+      nameDevice: device.nameDevice || "",
+      deviceStatus: device.deviceStatus || "active",
+    })
+    setActionError("")
+    setIsEditDialogOpen(true)
+  }
+
+  const openAddDialog = () => {
+    setFormData({ nameDevice: "", deviceStatus: "active" })
+    setActionError("")
+    setIsAddDialogOpen(true)
   }
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center p-8">
-        <RefreshCw className="h-8 w-8 animate-spin" />
-        <span className="ml-2">Đang tải dữ liệu...</span>
-      </div>
+      <Card>
+        <CardContent className="flex items-center justify-center py-8">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+            <p className="mt-2 text-muted-foreground">Đang tải danh sách thiết bị...</p>
+          </div>
+        </CardContent>
+      </Card>
     )
   }
 
   return (
     <div className="space-y-6">
-      {error && (
-        <Alert variant="destructive">
-          <AlertDescription>
-            {error}
-            <Button variant="outline" size="sm" onClick={refetch} className="ml-2 bg-transparent">
-              Thử lại
-            </Button>
-          </AlertDescription>
-        </Alert>
-      )}
-
-      {/* Header với tìm kiếm và nút thêm */}
-      <div className="flex flex-col md:flex-row gap-4 justify-between">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Tìm kiếm thiết bị..."
-            value={localSearchInput}
-            onChange={(e) => setLocalSearchInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                handleSearch()
-              }
-            }}
-            className="pl-10"
-          />
-          <div className="absolute right-2 top-1.5 flex gap-1">
-            <Button size="sm" variant="ghost" onClick={handleSearch} className="h-7 px-2">
-              Tìm
-            </Button>
-            {searchKeyword && (
-              <Button size="sm" variant="ghost" onClick={handleClearSearch} className="h-7 px-2">
-                <X className="h-3 w-3" />
-              </Button>
-            )}
-          </div>
-        </div>
-
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={refetch} disabled={loading}>
-            <RefreshCw className={`mr-2 h-4 w-4 ${loading ? "animate-spin" : ""}`} />
-            Làm mới
-          </Button>
-
-          <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="mr-2 h-4 w-4" />
-                Thêm Thiết Bị
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Thêm Thiết Bị Mới</DialogTitle>
-                <DialogDescription>Nhập thông tin thiết bị mới để thêm vào hệ thống.</DialogDescription>
-              </DialogHeader>
-
-              {addError && (
-                <Alert variant="destructive">
-                  <AlertDescription>{addError}</AlertDescription>
-                </Alert>
-              )}
-
-              <div className="grid gap-4 py-4">
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="deviceId" className="text-right">
-                    Mã Thiết Bị *
-                  </Label>
-                  <Input
-                    id="deviceId"
-                    value={newDevice.deviceId}
-                    onChange={(e) => {
-                      setNewDevice((prev) => ({ ...prev, deviceId: e.target.value }))
-                      setAddError("")
-                    }}
-                    className="col-span-3"
-                    placeholder="Nhập mã thiết bị"
-                  />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="nameDevice" className="text-right">
-                    Tên Thiết Bị *
-                  </Label>
-                  <Input
-                    id="nameDevice"
-                    value={newDevice.nameDevice}
-                    onChange={(e) => {
-                      setNewDevice((prev) => ({ ...prev, nameDevice: e.target.value }))
-                      setAddError("")
-                    }}
-                    className="col-span-3"
-                    placeholder="Nhập tên thiết bị"
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        handleAddDevice()
-                      }
-                    }}
-                  />
-                </div>
-              </div>
-              <DialogFooter>
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setShowAddDialog(false)
-                    resetAddForm()
-                  }}
-                  disabled={isAdding}
-                >
-                  Hủy
-                </Button>
-                <Button onClick={handleAddDevice} disabled={isAdding || !newDevice.deviceId.trim()}>
-                  {isAdding ? (
-                    <>
-                      <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-                      Đang thêm...
-                    </>
-                  ) : (
-                    "Thêm Thiết Bị"
-                  )}
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </div>
-      </div>
-
-      {/* Thống kê */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center">
-              <Monitor className="h-8 w-8 text-blue-600" />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-muted-foreground">Tổng thiết bị</p>
-                <p className="text-2xl font-bold">{filteredDevices.length}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center">
-              <Search className="h-8 w-8 text-green-600" />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-muted-foreground">
-                  {searchKeyword ? `Tìm kiếm: "${searchKeyword}"` : "Tổng kết quả"}
-                </p>
-                <p className="text-2xl font-bold">{filteredDevices.length}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Bảng thiết bị */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center">
-            <Monitor className="mr-2 h-5 w-5" />
-            Danh Sách Thiết Bị
+          <CardTitle className="flex items-center gap-2">
+            <Monitor className="h-5 w-5" />
+            Quản lý thiết bị
           </CardTitle>
+          <CardDescription>Thêm, sửa, xóa và quản lý các thiết bị chấm công trong hệ thống</CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
+        <CardContent className="space-y-4">
+          {error && (
+            <Alert variant="destructive">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+
+          {/* Search and Add */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-between">
+            <form onSubmit={handleSearch} className="flex gap-2 flex-1">
+              <Input
+                placeholder="Tìm kiếm thiết bị..."
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                className="flex-1"
+              />
+              <Button type="submit" variant="outline">
+                <Search className="h-4 w-4" />
+              </Button>
+              {searchKeyword && (
+                <Button type="button" variant="outline" onClick={handleClearSearch}>
+                  Xóa bộ lọc
+                </Button>
+              )}
+            </form>
+
+            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+              <DialogTrigger asChild>
+                <Button onClick={openAddDialog}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Thêm thiết bị
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Thêm thiết bị mới</DialogTitle>
+                  <DialogDescription>Nhập thông tin thiết bị chấm công mới</DialogDescription>
+                </DialogHeader>
+                <form onSubmit={handleAddDevice}>
+                  <div className="space-y-4 py-4">
+                    {actionError && (
+                      <Alert variant="destructive">
+                        <AlertDescription>{actionError}</AlertDescription>
+                      </Alert>
+                    )}
+                    <div className="space-y-2">
+                      <Label htmlFor="nameDevice">Tên thiết bị</Label>
+                      <Input
+                        id="nameDevice"
+                        value={formData.nameDevice}
+                        onChange={(e) => setFormData((prev) => ({ ...prev, nameDevice: e.target.value }))}
+                        placeholder="Nhập tên thiết bị"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button type="button" variant="outline" onClick={() => setIsAddDialogOpen(false)}>
+                      Hủy
+                    </Button>
+                    <Button type="submit" disabled={actionLoading}>
+                      {actionLoading ? "Đang thêm..." : "Thêm thiết bị"}
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </div>
+
+          {/* Devices Table */}
+          <div className="border rounded-lg">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[150px]">Mã Thiết Bị</TableHead>
-                  <TableHead>Tên Thiết Bị</TableHead>
-                  <TableHead>Ngày Tạo</TableHead>
-                  <TableHead className="text-right w-[150px]">Thao Tác</TableHead>
+                  <TableHead>ID</TableHead>
+                  <TableHead>Tên thiết bị</TableHead>
+                  <TableHead>Thao tác</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredDevices.length === 0 ? (
+                {devices.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={4} className="text-center py-10 text-muted-foreground">
+                    <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
                       {searchKeyword ? "Không tìm thấy thiết bị nào" : "Chưa có thiết bị nào"}
                     </TableCell>
                   </TableRow>
                 ) : (
-                  filteredDevices.map((device) => (
+                  devices.map((device) => (
                     <TableRow key={device.deviceId}>
                       <TableCell className="font-mono text-sm">{device.deviceId}</TableCell>
-                      <TableCell className="font-medium">
-                        {editingDevice === device.deviceId ? (
-                          <div className="space-y-2">
-                            {editError && (
-                              <Alert variant="destructive">
-                                <AlertDescription className="text-xs">{editError}</AlertDescription>
-                              </Alert>
-                            )}
-                            <Input
-                              value={editValue.nameDevice}
-                              onChange={(e) => {
-                                setEditValue((prev) => ({ ...prev, nameDevice: e.target.value }))
-                                setEditError("")
-                              }}
-                              className="h-8"
-                              onKeyDown={(e) => {
-                                if (e.key === "Enter") {
-                                  saveEditDevice()
-                                } else if (e.key === "Escape") {
-                                  cancelEdit()
-                                }
-                              }}
-                            />
-                            <div className="flex items-center space-x-2">
-                              <Button
-                                size="icon"
-                                variant="ghost"
-                                onClick={saveEditDevice}
-                                className="h-8 w-8"
-                                disabled={isUpdating}
-                              >
-                                {isUpdating ? (
-                                  <RefreshCw className="h-4 w-4 animate-spin" />
-                                ) : (
-                                  <Save className="h-4 w-4" />
-                                )}
-                              </Button>
-                              <Button
-                                size="icon"
-                                variant="ghost"
-                                onClick={cancelEdit}
-                                className="h-8 w-8"
-                                disabled={isUpdating}
-                              >
-                                <X className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="flex items-center">
-                            <Monitor className="mr-2 h-4 w-4 text-muted-foreground" />
-                            {device.nameDevice}
-                          </div>
-                        )}
-                      </TableCell>
-                      <TableCell>{formatDate(device.createdAt)}</TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end space-x-2">
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => startEditDevice(device)}
-                            disabled={editingDevice !== null}
-                          >
+                      <TableCell className="font-medium">{device.nameDevice}</TableCell>
+                    
+                      <TableCell>
+                        <div className="flex gap-2">
+                          <Button variant="outline" size="sm" onClick={() => openEditDialog(device)}>
                             <Edit className="h-4 w-4" />
                           </Button>
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                className="text-red-500 hover:text-red-700"
-                                disabled={editingDevice !== null}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>Xác nhận xóa</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  Bạn có chắc chắn muốn xóa thiết bị "{device.nameDevice}" (ID: {device.deviceId})? Hành
-                                  động này không thể hoàn tác.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Hủy</AlertDialogCancel>
-                                <AlertDialogAction
-                                  onClick={() => handleDeleteDevice(device.deviceId)}
-                                  className="bg-red-500 hover:bg-red-600"
-                                >
-                                  Xóa
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
+                          <Button variant="outline" size="sm" onClick={() => handleDeleteDevice(device)}>
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -508,6 +254,43 @@ export function DeviceManagement() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Edit Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Chỉnh sửa thiết bị</DialogTitle>
+            <DialogDescription>Cập nhật thông tin thiết bị {selectedDevice?.nameDevice}</DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleEditDevice}>
+            <div className="space-y-4 py-4">
+              {actionError && (
+                <Alert variant="destructive">
+                  <AlertDescription>{actionError}</AlertDescription>
+                </Alert>
+              )}
+              <div className="space-y-2">
+                <Label htmlFor="edit-nameDevice">Tên thiết bị</Label>
+                <Input
+                  id="edit-nameDevice"
+                  value={formData.nameDevice}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, nameDevice: e.target.value }))}
+                  placeholder="Nhập tên thiết bị"
+                  required
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+                Hủy
+              </Button>
+              <Button type="submit" disabled={actionLoading}>
+                {actionLoading ? "Đang cập nhật..." : "Cập nhật"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

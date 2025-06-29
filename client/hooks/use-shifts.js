@@ -27,7 +27,7 @@ export function useShifts() {
         return
       }
 
-      if (response.data.message === "success" && response.data.data) {
+      if (response.status < 300) {
         setShifts(response.data.data)
       } else {
         throw new Error("Invalid response format")
@@ -114,7 +114,7 @@ export function useShifts() {
       setError(null)
       const response = await axiosInstance.delete(`/shifts/${shiftId}`)
 
-      if (response.data.message === "success") {
+      if (response.status < 300) {
         // Remove from local state optimistically
         setShifts((prev) => prev.filter((shift) => shift.shiftId !== shiftId))
       }

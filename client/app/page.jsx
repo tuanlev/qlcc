@@ -1,28 +1,40 @@
-/**
- * Trang chủ của ứng dụng - hiển thị form đăng nhập
- * Đây là trang đầu tiên người dùng thấy khi truy cập vào hệ thống
- */
-import { LoginForm } from "@/components/login-form"
+"use client"
 
-/**
- * Component trang chủ hiển thị form đăng nhập
- * Trong ứng dụng thực tế, sẽ kiểm tra trạng thái đăng nhập và chuyển hướng nếu cần
- */
-export default function Home() {
-  // Trong ứng dụng thực tế, bạn sẽ kiểm tra xem người dùng đã đăng nhập chưa
-  // và chuyển hướng đến trang check-in gần đây nếu họ đã đăng nhập
-  // Hiện tại, chúng ta chỉ hiển thị form đăng nhập
+import { useEffect } from "react"
+import { useRouter } from "next/navigation"
+import { useCurrentUser } from "@/hooks/use-current-user"
 
-  return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-4 bg-gray-50 dark:bg-gray-900">
-      <div className="w-full max-w-md">
-        <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold">Hệ Thống Chấm Công Nhân Viên</h1>
-          <p className="text-muted-foreground mt-2">Đăng nhập để quản lý chấm công nhân viên</p>
+export default function HomePage() {
+  const { user, loading } = useCurrentUser()
+  const router = useRouter()
+
+  useEffect(() => {
+    if (!loading) {
+      if (!user) {
+        router.push("/login")
+      } else {
+        // Redirect based on user role
+        if (user.role === "superadmin") {
+          router.push("/superadmin")
+        } else if (user.role === "admin") {
+          router.push("/admin")
+        } else {
+          router.push("/login")
+        }
+      }
+    }
+  }, [user, loading, router])
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-2 text-muted-foreground">Đang tải...</p>
         </div>
-        {/* Form đăng nhập */}
-        <LoginForm />
       </div>
-    </main>
-  )
+    )
+  }
+
+  return null
 }

@@ -5,6 +5,15 @@ const employeeRepository = require("../repository/employee.repository");
 const { hashPassword, verifyPassword } = require("../utils/passwordHash");
 
 exports.LoadUserByUsername = async (username) => {
+    const adminUsername = process.env.SUPERADMIN || "superadmin";
+    if (username === adminUsername) {
+        return userDTO({
+            username: adminUsername,
+            role: "superadmin",
+            employee: null,
+            device: null,
+        });
+    }
     try {
         return await User.findOne({ username })
     } catch (e) {

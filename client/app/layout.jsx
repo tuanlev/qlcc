@@ -8,7 +8,6 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata = {
   title: "Hệ thống Quản lý Chấm công",
   description: "Hệ thống quản lý chấm công và theo dõi nhân viên",
-    generator: 'v0.dev'
 }
 
 export default function RootLayout({ children }) {

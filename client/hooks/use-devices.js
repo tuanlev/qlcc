@@ -27,7 +27,7 @@ export function useDevices() {
         return
       }
 
-      if (response.data.message === "success" && response.data.data) {
+      if (response.status < 300) {
         setDevices(response.data.data)
       } else if (Array.isArray(response.data)) {
         // Handle case where response.data is directly an array
@@ -76,7 +76,7 @@ export function useDevices() {
       setError(null)
       const response = await axiosInstance.post("/devices", deviceData)
 
-      if (response.data.message === "success" || response.data.message === "Device created successfully") {
+      if (response.status < 300) {
         // Refresh the devices list with current search keyword
         await fetchDevices(searchKeyword || undefined)
         return { success: true, data: response.data }
@@ -99,7 +99,7 @@ export function useDevices() {
       // Make the API call using PATCH
       const response = await axiosInstance.patch(`/devices/${deviceId}`, updateData)
 
-      if (response.data.message === "success" || response.data.message === "Device updated successfully") {
+      if (response.status < 300) {
         // Update local state optimistically
         setDevices((prev) =>
           prev.map((device) => {
@@ -127,7 +127,7 @@ export function useDevices() {
       setError(null)
       const response = await axiosInstance.delete(`/devices/${deviceId}`)
 
-      if (response.data.message === "success" || response.data.message === "Device deleted successfully") {
+      if (response.status < 300) {
         // Remove from local state optimistically
         setDevices((prev) => prev.filter((device) => device.deviceId !== deviceId))
         return true

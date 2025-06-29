@@ -35,10 +35,7 @@ export function useUsers() {
       }
 
       // Check for success message variations and data existence
-      if (
-        (response.data.message === "success" || response.data.message === "Users retrieved successfully") &&
-        response.data.data
-      ) {
+      if ((response.status < 300) && response.data.data) {
         setUsers(response.data.data)
       } else if (Array.isArray(response.data)) {
         // Handle case where response.data is directly an array

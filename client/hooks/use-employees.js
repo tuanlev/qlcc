@@ -124,7 +124,7 @@ export function useEmployees() {
       setError(null)
       const response = await axiosInstance.post("/employees", employeeData)
 
-      if (response.data.message === "success") {
+      if (response.status < 300) {
         // Refresh the employees list with current search keyword
         await fetchEmployees(searchKeyword || undefined, departmentFilter !== "all" ? departmentFilter : undefined)
       }
@@ -144,7 +144,7 @@ export function useEmployees() {
       // Make the API call using PATCH
       const response = await axiosInstance.patch(`/employees/${employeeId}`, updateData)
 
-      if (response.data.message === "Employee updated successfully" && response.data.data) {
+      if (response.status < 300) {
         // Use the complete updated employee data from API response
         const updatedEmployeeData = response.data.data
 
@@ -176,7 +176,7 @@ export function useEmployees() {
       setError(null)
       const response = await axiosInstance.delete(`/employees/${employeeId}`)
 
-      if (response.data.message === "success") {
+      if (response.status < 300) {
         // Remove from local state optimistically
         setEmployees((prev) => prev.filter((emp) => emp.employeeId !== employeeId))
       }

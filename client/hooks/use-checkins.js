@@ -51,7 +51,7 @@ export function useCheckins() {
 
       const response = await axiosInstance.get("/checkins")
 
-      if (response.data.message === "success" && response.data.data) {
+      if (response.status < 300) {
         const filteredCheckins = filterCheckinsByDevice(response.data.data)
         setCheckins(filteredCheckins)
       } else {
@@ -116,35 +116,7 @@ export function useCheckins() {
         }
       }
 
-      // Listen for checkin updates
-      const handleCheckinUpdate = (data) => {
-        try {
-          console.log("Received checkin update event:", data)
-
-          const checkinDeviceId = data.devide?.deviceId || data.device?.deviceId
-          const userDeviceId = user.device?.deviceId
-
-          if (checkinDeviceId === userDeviceId) {
-            setCheckins((prev) =>
-              prev.map((checkin) => {
-                // More flexible matching for updates
-                const employeeMatch =
-                  (checkin.employee?.employeeId &&
-                    data.employee?.employeeId &&
-                    checkin.employee.employeeId === data.employee.employeeId) ||
-                  (!checkin.employee?.employeeId && !data.employee?.employeeId)
-
-                const timestampMatch = checkin.timestamp === data.timestamp
-
-                return employeeMatch && timestampMatch ? data : checkin
-              }),
-            )
-          }
-        } catch (err) {
-          console.error("Error handling checkin update event:", err)
-        }
-      }
-
+      
       // Listen for batch checkin updates
       const handleCheckinsBatch = (data) => {
         try {
@@ -161,15 +133,13 @@ export function useCheckins() {
 
       // Register event listeners
       socket.on("checkin", handleCheckin)
-      socket.on("checkin_update", handleCheckinUpdate)
-      socket.on("checkins_batch", handleCheckinsBatch)
+     
 
       // Cleanup function
       return () => {
         console.log("Cleaning up Socket.IO event listeners")
         socket.off("checkin", handleCheckin)
-        socket.off("checkin_update", handleCheckinUpdate)
-        socket.off("checkins_batch", handleCheckinsBatch)
+        
       }
     }
   }, [socket, isConnected, user, filterCheckinsByDevice])

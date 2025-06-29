@@ -55,7 +55,7 @@ export function useShiftRecords() {
           return
         }
 
-        if (response.data.message === "success" && response.data.data) {
+      if (response.status < 300) {
           setShiftRecords(response.data.data)
           setCurrentQuery({ day, month, year })
         } else {

@@ -29,7 +29,8 @@ async function handleMessage(topic, message) {
             };
             const result = await addCheckin(processedData);
             try {
-                await addShiftRecord(result);
+                console.log("result",result)
+               console.log( await addShiftRecord(result));
             } catch (e) {
                 console.error('Error adding checkin:', e.message);
             }

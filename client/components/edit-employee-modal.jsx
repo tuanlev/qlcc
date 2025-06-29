@@ -141,7 +141,7 @@ export function EditEmployeeModal({ isOpen, onClose, employeeId }) {
   // Format shift display
   const getShiftDisplay = (shift) => {
     if (!shift) return ""
-    return `${shift.nameShift} (${shift.checkInHour}h-${shift.checkOutHour}h)`
+    return `${shift.shiftName} (${shift.checkInHour}h-${shift.checkOutHour}h)`
   }
 
   return (
@@ -202,7 +202,7 @@ export function EditEmployeeModal({ isOpen, onClose, employeeId }) {
                     <SelectItem value="">Không chọn</SelectItem>
                     {departments.map((dept) => (
                       <SelectItem key={dept.departmentId} value={dept.departmentId}>
-                        {dept.nameDepartment}
+                        {dept.departmentName}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -223,7 +223,7 @@ export function EditEmployeeModal({ isOpen, onClose, employeeId }) {
                     <SelectItem value="">Không chọn</SelectItem>
                     {positions.map((pos) => (
                       <SelectItem key={pos.positionId} value={pos.positionId}>
-                        {pos.namePosition}
+                        {pos.positionName}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -262,7 +262,7 @@ export function EditEmployeeModal({ isOpen, onClose, employeeId }) {
                     <SelectItem value="">Không chọn</SelectItem>
                     {devices.map((device) => (
                       <SelectItem key={device.deviceId} value={device.deviceId}>
-                        {device.nameDevice || device.deviceId}
+                        {device.deviceName || device.deviceId}
                       </SelectItem>
                     ))}
                   </SelectContent>

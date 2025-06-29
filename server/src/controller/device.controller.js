@@ -1,6 +1,6 @@
 const deviceService = require("../service/device.service");
 exports.getDevices = async (req, res, next) => {
-    if (req.authRole != "superadmin") {
+    if (!req.authRole) {
         res.status(401).json({
             message: "Unauthorized: You do not have permission to access this resource"
         });

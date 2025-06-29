@@ -10,7 +10,7 @@ exports.userDTO = ({ _id, username, role, imageAvatar, device, employee }) => {
   if (imageAvatar !== undefined) result.imageAvatar = imageAvatar;
   if (device) result.device = deviceDTO(device); // có thể populate riêng nếu cần
   try {
-      if (employee) result.employee = employeeDTO(employee); // có thể populate riêng nếu cần
+      if (employee) result.employee = employeeDTO( employee); // có thể populate riêng nếu cần
   }
   catch(e) {
     console.log("loi o day")

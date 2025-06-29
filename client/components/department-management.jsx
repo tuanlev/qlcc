@@ -82,7 +82,7 @@ export function DepartmentManagement() {
   // Xử lý bắt đầu chỉnh sửa bộ phận
   const startEditDepartment = (department) => {
     setEditingDepartment(department.departmentId)
-    setEditValue(department.nameDepartment)
+    setEditValue(department.departmentName)
   }
 
   // Xử lý hủy chỉnh sửa
@@ -380,7 +380,7 @@ export function DepartmentManagement() {
                         ) : (
                           <div className="flex items-center">
                             <Building className="mr-2 h-4 w-4 text-muted-foreground" />
-                            {department.nameDepartment}
+                            {department.departmentName}
                           </div>
                         )}
                       </TableCell>
@@ -409,7 +409,7 @@ export function DepartmentManagement() {
                               <AlertDialogHeader>
                                 <AlertDialogTitle>Xác nhận xóa</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                  Bạn có chắc chắn muốn xóa bộ phận "{department.nameDepartment}"? Hành động này không
+                                  Bạn có chắc chắn muốn xóa bộ phận "{department.departmentName}"? Hành động này không
                                   thể hoàn tác.
                                 </AlertDialogDescription>
                               </AlertDialogHeader>

@@ -1,14 +1,13 @@
 exports.departmentDTO = ({ _id, name }) => {
     const result = {};
     if (_id) result.departmentId = _id;
-    if (name) result.nameDepartment = name;
+    if (name) result.departmentName = name;
     return result;
 };
 
-exports.departmentDTOtoDepartment = ({ departmentId, nameDepartment }) => {
+exports.departmentDTOtoDepartment = ({ departmentId, departmentName }) => {
     const result = {};
     if (departmentId) result._id = departmentId;
-    nameDepartment= (nameDepartment)?null:nameDepartment;
-    if (nameDepartment || nameDepartment=="") result.name = nameDepartment;
+    if(departmentName !==undefined) result.name = (departmentName)?departmentName:null
     return result
 };

@@ -46,7 +46,7 @@ console.log(end.toISOString());   // 23:59 UTC
       }
       else
         checkinRecordSave.checkInStatus = "Unassigned";
-      await checkinRecordSave.save()
+      console.log(await checkinRecordSave.save())
     }
     else {
       // Nếu đã có bản ghi, cập nhật checkin
@@ -59,7 +59,7 @@ console.log(end.toISOString());   // 23:59 UTC
       }
       else
         checkinRecordSave.checkOutStatus = "Unassigned";
-      await ShiftRecord.findByIdAndUpdate(shiftRecordExist._id, checkinRecordSave, { new: true });
+      console.log(await ShiftRecord.findByIdAndUpdate(shiftRecordExist._id, checkinRecordSave, { new: true }));
 
     }
 

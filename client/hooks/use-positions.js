@@ -28,7 +28,7 @@ export function usePositions() {
         return
       }
 
-      if (response.data.message === "success" && response.data.data) {
+      if (response.status < 300) {
         setPositions(response.data.data)
       } else {
         throw new Error("Invalid response format")
@@ -57,7 +57,7 @@ export function usePositions() {
   const fetchDepartments = useCallback(async () => {
     try {
       const response = await axiosInstance.get("/departments")
-      if (response.data.message === "success" && response.data.data) {
+      if (response.status < 300) {
         setDepartments(response.data.data)
       }
     } catch (err) {
@@ -86,7 +86,7 @@ export function usePositions() {
       setError(null)
       const response = await axiosInstance.post("/positions", positionData)
 
-      if (response.data.message === "success") {
+      if (response.status < 300) {
         // Refresh the positions list with current search keyword
         await fetchPositions(searchKeyword || undefined)
       }
@@ -106,14 +106,14 @@ export function usePositions() {
       // Make the API call using PATCH
       const response = await axiosInstance.patch(`/positions/${positionId}`, updateData)
 
-      if (response.data.message === "success") {
+      if (response.status < 300) {
         // Update local state optimistically
         setPositions((prev) =>
           prev.map((pos) => {
             if (pos.positionId === positionId) {
               const updatedPosition = { ...pos }
-              if (updateData.namePosition) {
-                updatedPosition.namePosition = updateData.namePosition
+              if (updateData.positionName) {
+                updatedPosition.positionName = updateData.positionName
               }
               if (updateData.departmentId) {
                 // Find the department info
@@ -145,7 +145,7 @@ export function usePositions() {
       setError(null)
       const response = await axiosInstance.delete(`/positions/${positionId}`)
 
-      if (response.data.message === "success") {
+      if (response.status < 300) {
         // Remove from local state optimistically
         setPositions((prev) => prev.filter((pos) => pos.positionId !== positionId))
       }

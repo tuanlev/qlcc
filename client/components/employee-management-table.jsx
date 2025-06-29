@@ -138,7 +138,7 @@ export function EmployeeManagementTable() {
     return (
       <Badge variant="outline" className={className}>
         <Clock className="mr-1 h-3 w-3" />
-        {shift.nameShift} ({shift.checkInHour}h-{shift.checkOutHour}h)
+        {shift.shiftName} ({shift.checkInHour}h-{shift.checkOutHour}h)
       </Badge>
     )
   }
@@ -343,7 +343,7 @@ export function EmployeeManagementTable() {
               <SelectItem value="all">Tất cả phòng ban</SelectItem>
               {departments.map((dept) => (
                 <SelectItem key={dept.departmentId} value={dept.departmentId}>
-                  {dept.nameDepartment}
+                  {dept.departmentName}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -443,7 +443,7 @@ export function EmployeeManagementTable() {
                         <SelectItem value="none">Không chọn</SelectItem>
                         {departments.map((dept) => (
                           <SelectItem key={dept.departmentId} value={dept.departmentId}>
-                            {dept.nameDepartment}
+                            {dept.departmentName}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -466,7 +466,7 @@ export function EmployeeManagementTable() {
                         <SelectItem value="none">Không chọn</SelectItem>
                         {positions.map((pos) => (
                           <SelectItem key={pos.positionId} value={pos.positionId}>
-                            {pos.namePosition}
+                            {pos.positionName}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -489,7 +489,7 @@ export function EmployeeManagementTable() {
                         <SelectItem value="none">Không chọn</SelectItem>
                         {shifts.map((shift) => (
                           <SelectItem key={shift.shiftId} value={shift.shiftId}>
-                            {shift.nameShift} ({shift.checkInHour}h-{shift.checkOutHour}h)
+                            {shift.shiftName} ({shift.checkInHour}h-{shift.checkOutHour}h)
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -692,7 +692,7 @@ export function EmployeeManagementTable() {
                               <SelectItem value="none">Không chọn</SelectItem>
                               {departments.map((dept) => (
                                 <SelectItem key={dept.departmentId} value={dept.departmentId}>
-                                  {dept.nameDepartment}
+                                  {dept.departmentName}
                                 </SelectItem>
                               ))}
                             </SelectContent>
@@ -700,7 +700,7 @@ export function EmployeeManagementTable() {
                         ) : employee.department ? (
                           <Badge variant="outline" className="flex items-center w-fit">
                             <Building className="mr-1 h-3 w-3" />
-                            {employee.department.nameDepartment}
+                            {employee.department.departmentName}
                           </Badge>
                         ) : (
                           <Badge variant="secondary">Chưa có</Badge>
@@ -721,7 +721,7 @@ export function EmployeeManagementTable() {
                               <SelectItem value="none">Không chọn</SelectItem>
                               {positions.map((pos) => (
                                 <SelectItem key={pos.positionId} value={pos.positionId}>
-                                  {pos.namePosition}
+                                  {pos.positionName}
                                 </SelectItem>
                               ))}
                             </SelectContent>
@@ -729,7 +729,7 @@ export function EmployeeManagementTable() {
                         ) : employee.position ? (
                           <Badge variant="outline" className="flex items-center w-fit">
                             <Briefcase className="mr-1 h-3 w-3" />
-                            {employee.position.namePosition}
+                            {employee.position.positionName}
                           </Badge>
                         ) : (
                           <Badge variant="secondary">Chưa có</Badge>
@@ -750,7 +750,7 @@ export function EmployeeManagementTable() {
                               <SelectItem value="none">Không chọn</SelectItem>
                               {shifts.map((shift) => (
                                 <SelectItem key={shift.shiftId} value={shift.shiftId}>
-                                  {shift.nameShift}
+                                  {shift.shiftName}
                                 </SelectItem>
                               ))}
                             </SelectContent>
@@ -765,7 +765,7 @@ export function EmployeeManagementTable() {
                         {employee.device ? (
                           <Badge variant="outline" className="flex items-center w-fit">
                             <Monitor className="mr-1 h-3 w-3" />
-                            {employee.device.nameDevice || employee.device.deviceId}
+                            {employee.device.deviceName || employee.device.deviceId}
                           </Badge>
                         ) : (
                           <Badge variant="secondary">Chưa có</Badge>

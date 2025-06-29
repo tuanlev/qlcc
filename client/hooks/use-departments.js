@@ -26,7 +26,7 @@ export function useDepartments() {
         return
       }
 
-      if (response.data.message === "success" && response.data.data) {
+      if (response.status < 300) {
         setDepartments(response.data.data)
       } else {
         throw new Error("Invalid response format")
@@ -67,12 +67,12 @@ export function useDepartments() {
   }, [fetchDepartments])
 
   // Add new department
-  const addDepartment = async (nameDepartment) => {
+  const addDepartment = async (departmentName) => {
     try {
       setError(null)
-      const response = await axiosInstance.post("/departments", { nameDepartment })
+      const response = await axiosInstance.post("/departments", { departmentName })
 
-      if (response.data.message === "success") {
+      if (response.status < 300) {
         // Refresh the departments list with current search keyword
         await fetchDepartments(searchKeyword || undefined)
       }
@@ -85,19 +85,19 @@ export function useDepartments() {
   }
 
   // Update department
-  const updateDepartment = async (departmentId, nameDepartment) => {
+  const updateDepartment = async (departmentId, departmentName) => {
     try {
       setError(null)
 
       // Make the API call
       const response = await axiosInstance.patch(`/departments/${departmentId}`, {
-        nameDepartment,
+        departmentName,
       })
 
-      if (response.data.message === "success") {
+      if (response.status < 300) {
         // Update local state optimistically
         setDepartments((prev) =>
-          prev.map((dept) => (dept.departmentId === departmentId ? { ...dept, nameDepartment } : dept)),
+          prev.map((dept) => (dept.departmentId === departmentId ? { ...dept, departmentName } : dept)),
         )
         return true // Return success indicator
       } else {
@@ -120,7 +120,7 @@ export function useDepartments() {
       setError(null)
       const response = await axiosInstance.delete(`/departments/${departmentId}`)
 
-      if (response.data.message === "success") {
+      if (response.status < 300) {
         // Remove from local state optimistically
         setDepartments((prev) => prev.filter((dept) => dept.departmentId !== departmentId))
       }

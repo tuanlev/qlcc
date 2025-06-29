@@ -298,7 +298,7 @@ refetchUsers()
   const getDeviceDisplay = (deviceId) => {
     if (!deviceId) return "Không chọn"
     const device = devices.find((d) => d.deviceId === deviceId)
-    return device ? device.nameDevice || device.deviceId : deviceId
+    return device ? device.deviceName || device.deviceId : deviceId
   }
 
   // Format last login (placeholder since not in API response)
@@ -495,7 +495,7 @@ refetchUsers()
                         {user.device ? (
                           <Badge variant="outline" className="flex items-center w-fit">
                             <Monitor className="mr-1 h-3 w-3" />
-                            {user.device.nameDevice || user.device.deviceId}
+                            {user.device.deviceName || user.device.deviceId}
                           </Badge>
                         ) : (
                           <Badge variant="secondary">Chưa có thiết bị</Badge>
@@ -628,7 +628,7 @@ refetchUsers()
                   <SelectItem value="none">Không chọn</SelectItem>
                   {devices.map((device) => (
                     <SelectItem key={device.deviceId} value={device.deviceId}>
-                      {device.nameDevice || device.deviceId}
+                      {device.deviceName || device.deviceId}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -721,7 +721,7 @@ refetchUsers()
                   <SelectItem value="none">Bỏ chọn thiết bị</SelectItem>
                   {devices.map((device) => (
                     <SelectItem key={device.deviceId} value={device.deviceId}>
-                      {device.nameDevice || device.deviceId}
+                      {device.deviceName || device.deviceId}
                     </SelectItem>
                   ))}
                 </SelectContent>

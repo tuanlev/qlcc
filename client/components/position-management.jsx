@@ -53,7 +53,7 @@ export function PositionManagement() {
 
   // State cho thêm chức vụ mới
   const [newPosition, setNewPosition] = useState({
-    namePosition: "",
+    positionName: "",
     departmentId: null,
   })
   const [showAddDialog, setShowAddDialog] = useState(false)
@@ -62,7 +62,7 @@ export function PositionManagement() {
   // State cho chỉnh sửa
   const [editingPosition, setEditingPosition] = useState(null)
   const [editValue, setEditValue] = useState({
-    namePosition: "",
+    positionName: "",
     departmentId: null,
   })
   const [isUpdating, setIsUpdating] = useState(false)
@@ -73,19 +73,19 @@ export function PositionManagement() {
   // Reset form thêm mới
   const resetAddForm = () => {
     setNewPosition({
-      namePosition: "",
+      positionName: "",
       departmentId: null,
     })
   }
 
   // Xử lý thêm chức vụ mới
   const handleAddPosition = async () => {
-    if (!newPosition.namePosition.trim()) return
+    if (!newPosition.positionName.trim()) return
 
     setIsAdding(true)
     try {
       const positionData = {
-        namePosition: newPosition.namePosition.trim(),
+        positionName: newPosition.positionName.trim(),
       }
       if (newPosition.departmentId !== null) {
         positionData.departmentId = newPosition.departmentId
@@ -105,7 +105,7 @@ export function PositionManagement() {
   const startEditPosition = (position) => {
     setEditingPosition(position.positionId)
     setEditValue({
-      namePosition: position.namePosition,
+      positionName: position.positionName,
       departmentId: position.department?.departmentId || null,
     })
   }
@@ -114,19 +114,19 @@ export function PositionManagement() {
   const cancelEdit = () => {
     setEditingPosition(null)
     setEditValue({
-      namePosition: "",
+      positionName: "",
       departmentId: null,
     })
   }
 
   // Xử lý lưu chỉnh sửa chức vụ
   const saveEditPosition = async () => {
-    if (!editValue.namePosition.trim() || !editingPosition) return
+    if (!editValue.positionName.trim() || !editingPosition) return
 
     setIsUpdating(true)
     try {
       const updateData = {
-        namePosition: editValue.namePosition.trim(),
+        positionName: editValue.positionName.trim(),
       }
     updateData.departmentId = editValue.departmentId
       
@@ -136,7 +136,7 @@ export function PositionManagement() {
         refetch()
         setEditingPosition(null)
         setEditValue({
-          namePosition: "",
+          positionName: "",
           departmentId: null,
         })
       }
@@ -236,13 +236,13 @@ export function PositionManagement() {
               </DialogHeader>
               <div className="grid gap-4 py-4">
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="namePosition" className="text-right">
+                  <Label htmlFor="positionName" className="text-right">
                     Tên Chức Vụ
                   </Label>
                   <Input
-                    id="namePosition"
-                    value={newPosition.namePosition}
-                    onChange={(e) => setNewPosition((prev) => ({ ...prev, namePosition: e.target.value }))}
+                    id="positionName"
+                    value={newPosition.positionName}
+                    onChange={(e) => setNewPosition((prev) => ({ ...prev, positionName: e.target.value }))}
                     className="col-span-3"
                     placeholder="Nhập tên chức vụ"
                     onKeyDown={(e) => {
@@ -268,7 +268,7 @@ export function PositionManagement() {
                         <SelectItem value={null}>Không thuộc bộ phận nào</SelectItem>
                         {departments.map((dept) => (
                           <SelectItem key={dept.departmentId} value={dept.departmentId}>
-                            {dept.nameDepartment}
+                            {dept.departmentName}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -280,7 +280,7 @@ export function PositionManagement() {
                 <Button variant="outline" onClick={() => setShowAddDialog(false)} disabled={isAdding}>
                   Hủy
                 </Button>
-                <Button onClick={handleAddPosition} disabled={isAdding || !newPosition.namePosition.trim()}>
+                <Button onClick={handleAddPosition} disabled={isAdding || !newPosition.positionName.trim()}>
                   {isAdding ? (
                     <>
                       <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
@@ -385,8 +385,8 @@ export function PositionManagement() {
                         {editingPosition === position.positionId ? (
                           <div className="space-y-2">
                             <Input
-                              value={editValue.namePosition}
-                              onChange={(e) => setEditValue((prev) => ({ ...prev, namePosition: e.target.value }))}
+                              value={editValue.positionName}
+                              onChange={(e) => setEditValue((prev) => ({ ...prev, positionName: e.target.value }))}
                               className="h-8"
                               onKeyDown={(e) => {
                                 if (e.key === "Enter") {
@@ -407,7 +407,7 @@ export function PositionManagement() {
                                 <SelectItem value={null}>Không thuộc bộ phận nào</SelectItem>
                                 {departments.map((dept) => (
                                   <SelectItem key={dept.departmentId} value={dept.departmentId}>
-                                    {dept.nameDepartment}
+                                    {dept.departmentName}
                                   </SelectItem>
                                 ))}
                               </SelectContent>
@@ -440,7 +440,7 @@ export function PositionManagement() {
                         ) : (
                           <div className="flex items-center">
                             <Briefcase className="mr-2 h-4 w-4 text-muted-foreground" />
-                            {position.namePosition}
+                            {position.positionName}
                           </div>
                         )}
                       </TableCell>
@@ -448,7 +448,7 @@ export function PositionManagement() {
                         {position.department ? (
                           <Badge variant="outline" className="flex items-center w-fit">
                             <Building className="mr-1 h-3 w-3" />
-                            {position.department.nameDepartment}
+                            {position.department.departmentName}
                           </Badge>
                         ) : (
                           <Badge variant="secondary">Không có bộ phận</Badge>
@@ -479,7 +479,7 @@ export function PositionManagement() {
                               <AlertDialogHeader>
                                 <AlertDialogTitle>Xác nhận xóa</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                  Bạn có chắc chắn muốn xóa chức vụ "{position.namePosition}"? Hành động này không thể
+                                  Bạn có chắc chắn muốn xóa chức vụ "{position.positionName}"? Hành động này không thể
                                   hoàn tác.
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
