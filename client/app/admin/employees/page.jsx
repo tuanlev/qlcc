@@ -474,7 +474,7 @@ export default function EmployeesPage() {
                       </TableCell>
                       <TableCell>
                         <div className="flex flex-col">
-                          <span className="text-sm font-medium">{employee.device?.nameDevice || "Chưa gán"}</span>
+                          <span className="text-sm font-medium">{(employee.device?.deviceId)?(employee.device?.nameDevice)?employee.device?.nameDevice:"Chưa có tên": "Chưa gán"}</span>
                           {employee.device?.deviceId && (
                             <span className="text-xs text-muted-foreground font-mono">{employee.device.deviceId}</span>
                           )}

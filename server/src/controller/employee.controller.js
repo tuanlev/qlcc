@@ -1,5 +1,5 @@
 const employeeService= require("../service/employee.service");
-
+const shiftRecordService = require("../service/shiftrecord.service")
 exports.getEmployees = async (req, res, next) => {
     if (req.authRole != "admin") {
         res.status(401).json({
@@ -91,4 +91,22 @@ exports.deleteEmployeeById = async (req, res, next) => {
     } catch (e) {
         next(e);
     }
+}
+exports.getShiftRecordByEmployee = async (req, res, next) => {
+    if (req.authRole != "admin") {
+        res.status(401).json({
+            message: "Unauthorized: You do not have permission to access this resource"
+        });
+        return;
+    }
+    try {
+        const { employeeId } = req.params;
+        const data = await shiftRecordService.getShiftRecordsWithFiltersByEmployee({ employeeId, deviceId: req.grantedAuthority,...req.params });
+        res.status(201).json({
+            data
+        })  
+    } catch (e) {
+        console.log("employee.controller.error: " + e.message);
+        next(e);
+    }   
 }

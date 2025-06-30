@@ -13,6 +13,7 @@ export function useEmployees() {
   const [error, setError] = useState(null)
   const [searchKeyword, setSearchKeyword] = useState("")
   const [departmentFilter, setDepartmentFilter] = useState("all")
+  const [shiftRecords,setShiftRecords] = useState([])
 
   // Fetch employees from API with optional keyword and departmentId
   const fetchEmployees = useCallback(async (keyword, departmentId, abortController) => {
@@ -40,7 +41,7 @@ export function useEmployees() {
         return
       }
 
-      if (response.data.message === "success" && response.data.data) {
+      if (response.status < 300) {
         setEmployees(response.data.data)
       } else {
         throw new Error("Invalid response format")
@@ -75,23 +76,50 @@ export function useEmployees() {
         axiosInstance.get("/devices"),
       ])
 
-      if (deptResponse.data.message === "success" && deptResponse.data.data) {
+      if (response.status < 300) {
         setDepartments(deptResponse.data.data)
       }
-      if (posResponse.data.message === "success" && posResponse.data.data) {
+      if (response.status < 300) {
         setPositions(posResponse.data.data)
       }
-      if (shiftResponse.data.message === "success" && shiftResponse.data.data) {
+      if (response.status < 300) {
         setShifts(shiftResponse.data.data)
       }
-      if (deviceResponse.data.message === "success" && deviceResponse.data.data) {
+      if (response.status < 300) {
         setDevices(deviceResponse.data.data)
       }
     } catch (err) {
       console.error("Error fetching reference data:", err)
     }
   }, [])
+const getEmployeeShiftRecords = useCallback(async (employeeId, day = null, month = null, year = null) => {
+    try {
+      setError(null)
 
+      // Build query parameters
+      const queryParams = new URLSearchParams()
+      if (day) queryParams.append("day", day.toString())
+      if (month) queryParams.append("month", month.toString())
+      if (year) queryParams.append("year", year.toString())
+
+      const queryString = queryParams.toString()
+      const url = `/employees/${employeeId}/shiftrecords` + (queryString ? `?${queryString}` : "")
+
+      const response = await axiosInstance.get(url)
+
+      if (response.status < 300) {
+        return response.data.data
+      } else if (Array.isArray(response.data)) {
+        return response.data
+      } else {
+        throw new Error("Invalid response format")
+      }
+    } catch (err) {
+      const errorMessage = err.response?.data?.message || err.message || "Failed to fetch employee shift records"
+      console.error("Error fetching employee shift records:", err)
+      throw new Error(errorMessage)
+    }
+  }, [])
   // Search employees with keyword and department filter
   const searchEmployees = useCallback(
     async (keyword, departmentId) => {
@@ -197,7 +225,12 @@ export function useEmployees() {
     },
     [employees],
   )
-
+const getEmployeeInfoById = useCallback(
+    async(employeeId) => {
+      return  await axiosInstance.get(`/employees/${employeeId}`);
+    },
+    [],
+  )
   // Initialize data on mount with proper cleanup
   useEffect(() => {
     const abortController = new AbortController()
@@ -224,6 +257,8 @@ export function useEmployees() {
     error,
     searchKeyword,
     departmentFilter,
+    getEmployeeInfoById,
+    getEmployeeShiftRecords,
     addEmployee,
     updateEmployee,
     deleteEmployee,

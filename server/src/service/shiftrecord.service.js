@@ -132,3 +132,60 @@ exports.getShiftRecordsWithFilters = async ({ day, month, year, deviceId }) => {
     throw new Error("getShiftRecordsWithFiltersByDay.error: " + e.message);
   }
 }
+exports.getShiftRecordsWithFiltersByEmployee = async ({ employeeId,day, month, year, deviceId }) => {
+  if (!deviceId || !employeeId) return {};
+  try {
+
+ const now = new Date();
+
+  let y, m, d;
+  let start, end;
+
+  if (year && month && day) {
+    // Có đủ 3: tìm trong ngày
+    y = year;
+    m = month-1; // month: 1-12
+    start = new Date(y, m , day, 0, 0, 0, 0);
+    end   = new Date(y, m , day, 23, 59, 59, 999);
+  } else if (year && month) {
+    // Có year + month: tìm trong tháng
+    y = year;
+    m = month-1;
+    start = new Date(y, m , 1, 0, 0, 0, 0);
+    const lastDay = new Date(y, m, 0).getDate();
+    end = new Date(y, m, lastDay, 23, 59, 59, 999);
+  } else if (year) {
+    // Chỉ có year: tìm trong năm
+    y = year;
+    start = new Date(y, 0, 1, 0, 0, 0, 0);
+    end   = new Date(y, 11, 31, 23, 59, 59, 999);
+  } else {
+    // Không có year: tìm trong hôm nay (UTC)
+    y = now.getFullYear();
+    m = now.getMonth();
+    d = now.getDate();
+    start = new Date(y, m, d, 0, 0, 0, 0);
+    end   = new Date(y, m, d, 23, 59, 59, 999);
+  }
+    const shiftRecords = await ShiftRecord.find({
+      employee: employeeId,
+      createdAt: { $gte: start, $lt: end }
+    })
+      .populate({
+        path: "employee",
+        populate: ["shift", "department", "device", {
+          path: "position",
+          populate: ["department"]
+        }]
+      }).populate("shift").populate("checkIn")
+      .populate("checkOut").sort({ createdAt: -1 });
+
+    const dataReturn = shiftRecords.map(r => shiftRecordDTO(r));
+    return dataReturn;
+
+
+  }
+  catch (e) {
+    throw new Error("getShiftRecordsWithFiltersByEmployee " + e.message);
+  }
+}
