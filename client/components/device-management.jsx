@@ -108,15 +108,15 @@ export default function DeviceManagement() {
   const openEditDialog = (device) => {
     setSelectedDevice(device)
     setFormData({
+      deviceId:device.deviceId|| "",
       nameDevice: device.nameDevice || "",
-      deviceStatus: device.deviceStatus || "active",
     })
     setActionError("")
     setIsEditDialogOpen(true)
   }
 
   const openAddDialog = () => {
-    setFormData({ nameDevice: "", deviceStatus: "active" })
+    setFormData({ deviceId: "" ,nameDevice: "", deviceStatus: "active" })
     setActionError("")
     setIsAddDialogOpen(true)
   }
@@ -189,6 +189,16 @@ export default function DeviceManagement() {
                         <AlertDescription>{actionError}</AlertDescription>
                       </Alert>
                     )}
+                    <div className="space-y-2">
+                      <Label htmlFor="deviceId">ID thiết bị</Label>
+                      <Input
+                        id="deviceId"
+                        value={formData.deviceId}
+                        onChange={(e) => setFormData((prev) => ({ ...prev, deviceId: e.target.value }))}
+                        placeholder="Nhập ID thiết bị"
+                        required
+                      />
+                    </div>
                     <div className="space-y-2">
                       <Label htmlFor="nameDevice">Tên thiết bị</Label>
                       <Input

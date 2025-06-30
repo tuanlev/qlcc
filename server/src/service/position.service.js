@@ -44,7 +44,7 @@ exports.getPositionById =async (positionId) => {
     try {
        return positionDTO(await Position.findById(positionId).populate("department"));
     } catch (e) { 
-        throw new Error("position.service.getPositionById.error: "+ e.message);d
+        throw new Error("getPositionById.error: "+ e.message);d
     }
 }
 exports.updatePositionById = async (positionId,position) => {
@@ -53,6 +53,6 @@ exports.updatePositionById = async (positionId,position) => {
        return positionDTO(await Position.findByIdAndUpdate(positionId,position,{new:true}).populate("department"));
 
     } catch (e) { 
-        throw new Error("position.service.updatePositionById.error: "+ e.message);d
+        throw new Error("updatePositionById.error: "+ e.message);d
     }
 }
