@@ -58,11 +58,7 @@ export default function EmployeeDetailPage() {
       setError(null)
 
       // Get employee info
-      const employeeData = getEmployeeInfoById(employeeId)
-      if (!employeeData) {
-        throw new Error("Không tìm thấy nhân viên")
-      }
-      setEmployee(employeeData)
+     
 
       // Get shift records
       const records = await getEmployeeShiftRecords(employeeId, day, month, year)
@@ -74,7 +70,7 @@ export default function EmployeeDetailPage() {
       setLoading(false)
     }
   }
-
+  
   // Quick filter functions
   const getTodayRecords = () => {
     const today = new Date()
@@ -246,6 +242,15 @@ export default function EmployeeDetailPage() {
 
   // Initialize data
   useEffect(() => {
+    const getEM = async () => {
+const employeeData = await getEmployeeInfoById(employeeId)
+      if (!employeeData) {
+        throw new Error("Không tìm thấy nhân viên")
+      }
+      console.log(employeeData[0])
+      setEmployee(employeeData[0])
+  }
+    getEM()
     if (employeeId) {
       getCurrentMonthRecords()
     }

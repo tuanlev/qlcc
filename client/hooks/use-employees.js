@@ -227,7 +227,8 @@ const getEmployeeShiftRecords = useCallback(async (employeeId, day = null, month
   )
 const getEmployeeInfoById = useCallback(
     async(employeeId) => {
-      return  await axiosInstance.get(`/employees/${employeeId}`);
+      const response = await axiosInstance.get(`/employees/${employeeId}`);
+    return response.data.data
     },
     [],
   )
